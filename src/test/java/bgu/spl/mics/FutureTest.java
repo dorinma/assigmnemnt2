@@ -7,33 +7,38 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FutureTest {
 
-    //Future<T> future;
+    Future future;
 
     @BeforeEach
     public void setUp(){
-        //future = new Future<T>();
+        future = new Future();
     }
 
     @AfterEach
     public void tearDown(){
-
+        future = null;
     }
 
     @Test
-    public void test(){
-        //TODO: change this test and add more tests :)
-        fail("Not a good test");
+    void test_Get1() {
+        future.resolve("done");
+        assertEquals("done", future.get());
     }
 
     @Test
-    void get() {
+    void test_Get2() {
+        future.resolve("done");
+        assertNotEquals("", future.get());
     }
 
     @Test
-    void resolve() {
+    void test_Resolve() {
+        future.resolve("done");
+        assertTrue(future.isDone());
     }
 
     @Test
-    void isDone() {
+    void test_IsDone() {
+        assertFalse(future.isDone());
     }
 }
