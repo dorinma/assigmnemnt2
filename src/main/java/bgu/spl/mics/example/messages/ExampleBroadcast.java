@@ -2,7 +2,7 @@ package bgu.spl.mics.example.messages;
 
 import bgu.spl.mics.Broadcast;
 
-public class ExampleBroadcast implements Broadcast {
+public class ExampleBroadcast implements Broadcast<Number> {
 
     private String senderId;
 

@@ -32,4 +32,32 @@ public class MessageBrokerTest {
         mBroker.complete(e, "done");
         assertEquals(future.get(), "done");
     }
+
+    @Test
+    public void test_IfRegistered() {
+        Broadcast broadcast = new BroadcastIntegerImpl();
+        mBroker.sendBroadcast(broadcast);
+        mBroker.register(sub);
+        mBroker.subscribeBroadcast((Class<? extends Broadcast<Number>>) BroadcastIntegerImpl.class, sub);
+        try {
+            assertEquals(broadcast, mBroker.awaitMessage(sub));
+        }
+        catch (InterruptedException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void test_IfNotRegistered() {
+        Broadcast broadcast = new BroadcastIntegerImpl();
+        mBroker.sendBroadcast(broadcast);
+        try {
+            mBroker.awaitMessage(sub);
+            fail();
+        }
+        catch (InterruptedException e) {
+            assert true;
+        }
+    }
+
 }

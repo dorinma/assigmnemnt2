@@ -22,7 +22,7 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {
+	public void subscribeBroadcast(Class<? extends Broadcast<Number>> type, Subscriber m) {
 		// TODO Auto-generated method stub
 
 	}
@@ -34,7 +34,7 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	@Override
-	public void sendBroadcast(Broadcast b) {
+	public void sendBroadcast(Broadcast<Number> b) {
 		// TODO Auto-generated method stub
 
 	}

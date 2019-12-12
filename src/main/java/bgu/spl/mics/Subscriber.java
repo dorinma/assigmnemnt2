@@ -71,7 +71,7 @@ public abstract class Subscriber extends RunnableSubPub {
      *                 {@code type} are taken from this Subscriber message
      *                 queue.
      */
-    protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
+    protected final <B extends Broadcast<Number>> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
         //TODO: implement this.
     }
 
