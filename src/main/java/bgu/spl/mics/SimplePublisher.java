@@ -33,7 +33,7 @@ public final class SimplePublisher {
      * <p>
      * @param b The broadcast message to send
      */
-    public final void sendBroadcast(Broadcast<Number> b) {
+    public final void sendBroadcast(Broadcast b) {
         //TODO: implement this.
     }
 }

@@ -1,11 +1,21 @@
 package bgu.spl.mics;
 
+import java.util.Map;
+import java.util.Queue;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 /**
  * The {@link MessageBrokerImpl class is the implementation of the MessageBroker interface.
  * Write your implementation here!
  * Only private fields and methods can be added to this class.
  */
 public class MessageBrokerImpl implements MessageBroker {
+
+	private ConcurrentHashMap<Subscriber, ConcurrentLinkedQueue<Message>> subscribers;
+	private ConcurrentHashMap<Class<? extends Event>, ConcurrentLinkedQueue<Subscriber>> topics;
+	private ConcurrentHashMap<Event, Future> futures;
 
 	/**
 	 * Retrieves the single instance of this class.
@@ -17,53 +27,64 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
-		// TODO Auto-generated method stub
-
+		if(!topics.get(type).contains(m))
+			topics.get(type).add(m);
 	}
 
 	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast<Number>> type, Subscriber m) {
+	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-		// TODO Auto-generated method stub
-
+		if(futures.containsKey(e)){
+			futures.get(e).resolve(result);
+		}
 	}
 
 	@Override
-	public void sendBroadcast(Broadcast<Number> b) {
-		// TODO Auto-generated method stub
-
+	public void sendBroadcast(Broadcast b) {
+		for (Subscriber sub: topics.get(b.getClass())
+			 ) {
+			subscribeBroadcast(b.getClass(), sub);
+		}
 	}
 
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		// TODO Auto-generated method stub
-		return null;
+		Subscriber sub = topics.get(e).poll();
+		if (sub == null)
+			return null;
+		else {
+			subscribers.get(sub).add(e);
+			Future<T> future = new Future<>();
+			futures.put(e, future);
+			return future;
+		}
 	}
 
 	@Override
 	public void register(Subscriber m) {
-		// TODO Auto-generated method stub
-
+		if(!subscribers.containsKey(m)) {
+			subscribers.put(m, new ConcurrentLinkedQueue());
+		}
 	}
 
 	@Override
 	public void unregister(Subscriber m) {
-		// TODO Auto-generated method stub
-
+		if(subscribers.containsKey(m)) {
+			subscribers.remove(m);
+		}
+		//TODO Implement
+		//remove m from topics- foreach??
 	}
 
 	@Override
-	public Message awaitMessage(Subscriber m) throws InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+	public Message awaitMessage(Subscriber m) {
+		return subscribers.get(m).poll();
 	}
-
-	
 
 }

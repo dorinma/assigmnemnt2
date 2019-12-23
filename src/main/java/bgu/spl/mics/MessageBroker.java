@@ -26,7 +26,7 @@ public interface MessageBroker {
      * @param type 	The type to subscribe to.
      * @param s    	The Subscriber.
      */
-    void subscribeBroadcast(Class<? extends Broadcast<Number>> type, Subscriber s);
+    void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber s);
 
     /**
      * Notifies the MessageBroker that the event {@code e} is completed and its
@@ -46,7 +46,7 @@ public interface MessageBroker {
      * <p>
      * @param b 	The message to added to the queues.
      */
-    void sendBroadcast(Broadcast<Number> b);
+    void sendBroadcast(Broadcast b);
 
     /**
      * Adds the {@link Event} {@code e} to the message queue of one of the

@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -15,9 +16,16 @@ public class Inventory {
 	/**
      * Retrieves the single instance of this class.
      */
+	private static class SingletonHolder {
+		private static Inventory instance = new Inventory();
+	}
+
+	private Inventory() {
+		gadgets = new LinkedList<>();
+	}
+
 	public static Inventory getInstance() {
-		//TODO: Implement this
-		return null;
+		return SingletonHolder.instance;
 	}
 
 	/**
@@ -28,7 +36,9 @@ public class Inventory {
      * 						of the inventory.
      */
 	public void load (String[] inventory) {
-		//TODO: Implement this
+		for (int i = 0; i < inventory.length; i++) {
+			gadgets.add(inventory[i]);
+		}
 	}
 	
 	/**
@@ -38,8 +48,14 @@ public class Inventory {
      * @return 	‘false’ if the gadget is missing, and ‘true’ otherwise
      */
 	public boolean getItem(String gadget){
-		//TODO: Implement this
-		return true;
+		for (String g: gadgets
+			 ) {
+			if(g.equals(gadget)) {
+				gadgets.remove(g);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

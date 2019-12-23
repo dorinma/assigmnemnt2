@@ -1,6 +1,9 @@
 package bgu.spl.mics.application.passiveObjects;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Passive data-object representing a information about an agent in MI6.
@@ -10,14 +13,21 @@ import java.util.Map;
  */
 public class Squad {
 
+	private static class SingletonHolder {
+		private static Squad instance = new Squad();
+	}
+
 	private Map<String, Agent> agents;
+
+	private Squad() {
+		agents = new ConcurrentHashMap<>();
+	}
 
 	/**
 	 * Retrieves the single instance of this class.
 	 */
 	public static Squad getInstance() {
-		//TODO: Implement this
-		return null;
+		return  SingletonHolder.instance;
 	}
 
 	/**
@@ -27,22 +37,32 @@ public class Squad {
 	 * 						of the squad.
 	 */
 	public void load (Agent[] agents) {
-		// TODO Implement this
+		for(int i = 0; i < agents.length; i++) {
+			this.agents.put(agents[i].getSerialNumber(), agents[i]);
+		}
 	}
 
 	/**
 	 * Releases agents.
 	 */
 	public void releaseAgents(List<String> serials){
-		// TODO Implement this
+		for (String s: serials
+			 ) {
+			Agent a = agents.get(s);
+			if(a != null) {
+				a.release();
+				a.notifyAll();
+			}
+		}
 	}
 
 	/**
 	 * simulates executing a mission by calling sleep.
 	 * @param time   milliseconds to sleep
 	 */
-	public void sendAgents(List<String> serials, int time){
-		// TODO Implement this
+	public void sendAgents(List<String> serials, int time) throws InterruptedException {
+		Thread.currentThread().sleep(time*100);
+		releaseAgents(serials);
 	}
 
 	/**
@@ -50,9 +70,20 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public boolean getAgents(List<String> serials){
-		// TODO Implement this
-		return false;
+	public boolean getAgents(List<String> serials) throws InterruptedException {
+		Collections.sort(serials); //to avoid deadlock
+		for (String s: serials
+			 ) {
+			Agent a = agents.get(s);
+			if(a == null)
+				return false;
+			synchronized (a){
+				while(!a.isAvailable())
+					a.wait();
+				a.acquire();
+			}
+		}
+		return true;
 	}
 
     /**
@@ -61,8 +92,12 @@ public class Squad {
      * @return a list of the names of the agents with the specified serials.
      */
     public List<String> getAgentsNames(List<String> serials){
-        // TODO Implement this
-	    return null;
+    	List<String> names = new LinkedList<>();
+		for (String s: serials
+			 ) {
+			names.add(agents.get(s).getName());
+		}
+        return names;
     }
 
 }
