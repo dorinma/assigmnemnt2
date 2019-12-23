@@ -1,3 +1,4 @@
+/*
 package bgu.spl.mics;
 
 import bgu.spl.mics.application.subscribers.M;
@@ -61,3 +62,4 @@ public class MessageBrokerTest {
     }
 
 }
+*/

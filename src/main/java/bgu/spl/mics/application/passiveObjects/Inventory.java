@@ -13,20 +13,19 @@ import java.util.List;
  */
 public class Inventory {
 	private List<String> gadgets;
+	private static Inventory instance = null;
 	/**
      * Retrieves the single instance of this class.
      */
-	private static class SingletonHolder {
-		private static Inventory instance = new Inventory();
-	}
 
 	private Inventory() {
 		gadgets = new LinkedList<>();
 	}
 
-	public static Inventory getInstance() {
-		return SingletonHolder.instance;
-	}
+	public static synchronized Inventory getInstance() {
+		if (instance == null)
+			instance = new Inventory();
+		return instance;	}
 
 	/**
      * Initializes the inventory. This method adds all the items given to the gadget
@@ -48,9 +47,10 @@ public class Inventory {
      * @return 	‘false’ if the gadget is missing, and ‘true’ otherwise
      */
 	public boolean getItem(String gadget){
-		for (String g: gadgets
-			 ) {
-			if(g.equals(gadget)) {
+		for (String g: gadgets)
+		{
+			if(g.equals(gadget))
+			{
 				gadgets.remove(g);
 				return true;
 			}

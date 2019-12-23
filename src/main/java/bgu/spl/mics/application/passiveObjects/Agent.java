@@ -11,58 +11,44 @@ public class Agent {
 	private String name;
 	private boolean available;
 
-	/**
-	 * Sets the serial number of an agent.
-	 */
+	public Agent (String serialNumber, String name){
+		this.serialNumber = serialNumber;
+		this.name = name;
+		available = true;
+	}
+
+	 //Sets the serial number of an agent.
 	public void setSerialNumber(String serialNumber) {
 		this.serialNumber = serialNumber;
 	}
 
-	/**
-     * Retrieves the serial number of an agent.
-     * <p>
-     * @return The serial number of an agent.
-     */
-	public String getSerialNumber() {
-		return serialNumber;
-	}
 
-	/**
-	 * Sets the name of the agent.
-	 */
+    //Retrieves the serial number of an agent
+	public String getSerialNumber() {
+		return serialNumber; }
+
+	//Sets the name of the agent
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	/**
-     * Retrieves the name of the agent.
-     * <p>
-     * @return the name of the agent.
-     */
+	//Retrieves the name of the agent
 	public String getName() {
 		return name;
 	}
 
-	/**
-     * Retrieves if the agent is available.
-     * <p>
-     * @return if the agent is available.
-     */
+	//Retrieves if the agent is available.
 	public boolean isAvailable() {
 		return available;
 	}
 
-	/**
-	 * Acquires an agent.
-	 */
+	//Acquires an agent.
 	public void acquire(){
 		available = false;
-	}
+	} //agent is busy
 
-	/**
-	 * Releases an agent.
-	 */
+	//Releases an agent
 	public void release(){
 		available = true;
-	}
+	} //agent is available
 }
