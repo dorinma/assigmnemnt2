@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.passiveObjects.Diary;
+
 import java.util.Map;
 import java.util.Queue;
 import java.util.List;
@@ -13,20 +15,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class MessageBrokerImpl implements MessageBroker {
 
+	private static MessageBrokerImpl instance = null;
 	private ConcurrentHashMap<Subscriber, ConcurrentLinkedQueue<Message>> subscribers;
 	private ConcurrentHashMap<Class<? extends Event>, ConcurrentLinkedQueue<Subscriber>> topics;
 	private ConcurrentHashMap<Event, Future> futures;
 
-	/**
-	 * Retrieves the single instance of this class.
-	 */
-	public static MessageBroker getInstance() {
-		//TODO: Implement this
-		return null;
+
+	//Retrieves the single instance of this class
+	public static synchronized MessageBroker getInstance() {
+		if (instance == null)
+		instance = new MessageBrokerImpl();
+		return instance;
 	}
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
+
 		if(!topics.get(type).contains(m))
 			topics.get(type).add(m);
 	}
