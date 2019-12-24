@@ -13,10 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Squad {
 
-	private static class SingletonHolder {
-		private static Squad instance = new Squad();
-	}
-
+	private static Squad instance=null; //for thread safe singleton
 	private Map<String, Agent> agents;
 
 	private Squad() {
@@ -26,9 +23,10 @@ public class Squad {
 	/**
 	 * Retrieves the single instance of this class.
 	 */
-	public static Squad getInstance() {
-		return  SingletonHolder.instance;
-	}
+	public static synchronized Squad getInstance() {
+		if (instance == null)
+			instance = new Squad();
+		return instance;	}
 
 	/**
 	 * Initializes the squad. This method adds all the agents to the squad.
@@ -46,12 +44,11 @@ public class Squad {
 	 * Releases agents.
 	 */
 	public void releaseAgents(List<String> serials){
-		for (String s: serials
-			 ) {
+		for (String s: serials) {
 			Agent a = agents.get(s);
 			if(a != null) {
 				a.release();
-				a.notifyAll();
+				a.notifyAll(); //TO ASK
 			}
 		}
 	}
@@ -93,8 +90,7 @@ public class Squad {
      */
     public List<String> getAgentsNames(List<String> serials){
     	List<String> names = new LinkedList<>();
-		for (String s: serials
-			 ) {
+		for (String s: serials) {
 			names.add(agents.get(s).getName());
 		}
         return names;
