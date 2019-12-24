@@ -40,7 +40,7 @@ public class Moneypenny extends Subscriber {
 			terminate();
 		});
 		subscribeEvent(AgentsAvailableEvent.class, (event) -> {
-			LinkedList <String> agentList = event.getAgents();
+			LinkedList <String> agentList = (LinkedList)event.getAgents();
 			boolean allAgentsAvialible = Squad.getInstance().getAgents(agentList);
 
 			if (allAgentsAvialible)
