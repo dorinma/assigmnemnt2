@@ -27,6 +27,7 @@ public class M extends Subscriber {
 		super(name);
 
 		// TODO Implement this
+		//
 	}
 
 	@Override
