@@ -29,7 +29,7 @@ public class Future<T> {
      * @return return the result of type T if it is available, if not wait until it is available.
      * 	       
      */
-	public T get() throws InterruptedException {
+	public T get() {
 		while (result == null) {
 			try {
 				this.wait();
@@ -68,6 +68,7 @@ public class Future<T> {
      *         elapsed, return null.
      */
 	public T get(long timeout, TimeUnit unit) throws InterruptedException {
+		timeout = TimeUnit.MILLISECONDS.convert(timeout, unit); //convert to mili seconds
 		if (result == null) {
 			try {
 				synchronized (this) {

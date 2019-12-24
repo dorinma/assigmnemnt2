@@ -42,12 +42,12 @@ public class Intelligence extends Subscriber {
 			terminate();
 		});
 
-		while (missionList.size() > 0 && missionList.get(0).getTimeIssued() <= currTick)
+		if (missionList.size() > 0 && missionList.get(0).getTimeIssued() <= currTick)
 		{
 			MissionInfo currMission = missionList.get(0);
 			missionList.remove(0);
 			MissionRecievedEvent mre = new MissionRecievedEvent(currMission);
-			Future<Report> f = getSimplePublisher().sendEvent(mre);
+			getSimplePublisher().sendEvent(mre);
 		}
 	}
 

@@ -33,11 +33,9 @@ public class Q extends Subscriber {
 			String gdg = event.getGadget();
 			if (Inventory.getInstance().getItem(gdg))
 			{
-				//MessageBrokerImpl.getInstance().complete(event, currTick);
-				complete(event, currTick); //TODO need to send result instead of tick
+				complete(event, currTick);
 			}
 			else
-				//MessageBrokerImpl.getInstance().complete(event, -1);
 				complete(event, -1);
 
 		});

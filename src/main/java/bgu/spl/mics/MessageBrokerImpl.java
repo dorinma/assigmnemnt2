@@ -76,14 +76,17 @@ public class MessageBrokerImpl implements MessageBroker {
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		Subscriber sub = topics.get(e).poll(); //we found the first sub that is registered to this type of event
-		if (sub == null)
-			return null;
-		else {
-			subscribers.get(sub).add(e); //will go to subscribers map and add to this sub this event
-			Future<T> future = new Future<>();
-			futures.put(e, future);
-			return future;
+		synchronized (topics.get(e.getClass())) {
+			Subscriber sub = topics.get(e).poll(); //we found the first sub that is registered to this type of event
+			if (sub == null)
+				return null;
+			else {
+				subscribers.get(sub).add(e); //will go to subscribers map and add to this sub this event
+				topics.get(e).add(sub);
+				Future<T> future = new Future<>();
+				futures.put(e, future);
+				return future;
+			}
 		}
 	}
 
