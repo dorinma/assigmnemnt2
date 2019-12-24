@@ -16,10 +16,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MessageBrokerImpl implements MessageBroker {
 
 	private static MessageBrokerImpl instance = null;
-	private ConcurrentHashMap<Subscriber, ConcurrentLinkedQueue<Message>> subscribers;
-	private ConcurrentHashMap<Class<? extends Event>, ConcurrentLinkedQueue<Subscriber>> topics;
-	private ConcurrentHashMap<Event, Future> futures;
+	private ConcurrentHashMap<Subscriber, ConcurrentLinkedQueue<Message>> subscribers; //sub - events/broadcast msg
+	private ConcurrentHashMap<Class<? extends Event>, ConcurrentLinkedQueue<Subscriber>> topics; //events(3) - sub
+	private ConcurrentHashMap<Event, Future> futures; //each event waits to return value;
 
+	private MessageBrokerImpl() {
+		subscribers = new ConcurrentHashMap<>();
+		topics = new ConcurrentHashMap<>();
+		futures = new ConcurrentHashMap<>();
+	}
 
 	//Retrieves the single instance of this class
 	public static synchronized MessageBroker getInstance() {
@@ -30,7 +35,6 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
-
 		if(!topics.get(type).contains(m))
 			topics.get(type).add(m);
 	}
@@ -50,8 +54,7 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		for (Subscriber sub: topics.get(b.getClass())
-			 ) {
+		for (Subscriber sub: topics.get(b.getClass())) {
 			subscribeBroadcast(b.getClass(), sub);
 		}
 	}
@@ -59,11 +62,11 @@ public class MessageBrokerImpl implements MessageBroker {
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		Subscriber sub = topics.get(e).poll();
+		Subscriber sub = topics.get(e).poll(); //we found the first sub that is registered to this type of event
 		if (sub == null)
 			return null;
 		else {
-			subscribers.get(sub).add(e);
+			subscribers.get(sub).add(e); //will go to subscribers map and add to this sub this event
 			Future<T> future = new Future<>();
 			futures.put(e, future);
 			return future;
@@ -73,17 +76,20 @@ public class MessageBrokerImpl implements MessageBroker {
 	@Override
 	public void register(Subscriber m) {
 		if(!subscribers.containsKey(m)) {
-			subscribers.put(m, new ConcurrentLinkedQueue());
+			subscribers.put(m, new ConcurrentLinkedQueue()); //new subscriber
 		}
 	}
 
 	@Override
 	public void unregister(Subscriber m) {
+		ConcurrentLinkedQueue<Message> mEvents = subscribers.get(m);
+		for (Message msg : mEvents) { //remove m from topics
+			topics.get(msg).remove(m);
+		}
+
 		if(subscribers.containsKey(m)) {
 			subscribers.remove(m);
 		}
-		//TODO Implement
-		//remove m from topics- foreach??
 	}
 
 	@Override

@@ -1,6 +1,10 @@
 package bgu.spl.mics.application.publishers;
 
+import bgu.spl.mics.MessageBroker;
+import bgu.spl.mics.MessageBrokerImpl;
 import bgu.spl.mics.Publisher;
+import bgu.spl.mics.application.messeges.TerminateBroadcast;
+import bgu.spl.mics.application.messeges.TickBroadcast;
 
 /**
  * TimeService is the global system timer There is only one instance of this Publisher.
@@ -13,15 +17,30 @@ import bgu.spl.mics.Publisher;
  */
 public class TimeService extends Publisher {
 
-	public TimeService() {
-		super("Change_This_Name");
-		// TODO Implement this
+
+	int duration;
+	int currTick = 0;
+
+	public TimeService(int duration) {
+		super("TimeService");
+		this.duration = duration;
 	}
+
+	public int getDuration() { return duration; }
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		try {
+			while (currTick < duration) {
+				TickBroadcast tickBroadcast = new TickBroadcast(currTick);
+				MessageBrokerImpl.getInstance().sendBroadcast(tickBroadcast);
+				Thread.sleep(100);
+				currTick++;
+			}
+			TerminateBroadcast terminateBroadcast = new TerminateBroadcast();
+			MessageBrokerImpl.getInstance().sendBroadcast(terminateBroadcast);
+		}
+		catch (InterruptedException ex) {}
 	}
 
 	@Override

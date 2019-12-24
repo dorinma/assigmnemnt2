@@ -1,6 +1,13 @@
 package bgu.spl.mics.application.subscribers;
 
+import bgu.spl.mics.Callback;
+import bgu.spl.mics.MessageBrokerImpl;
 import bgu.spl.mics.Subscriber;
+import bgu.spl.mics.application.messeges.GadgetsAvailableEvent;
+import bgu.spl.mics.application.messeges.TerminateBroadcast;
+import bgu.spl.mics.application.messeges.TickBroadcast;
+import bgu.spl.mics.application.passiveObjects.Inventory;
+import jdk.nashorn.internal.codegen.CompilerConstants;
 
 /**
  * Q is the only Subscriber\Publisher that has access to the {@link bgu.spl.mics.application.passiveObjects.Inventory}.
@@ -10,15 +17,30 @@ import bgu.spl.mics.Subscriber;
  */
 public class Q extends Subscriber {
 
-	public Q() {
-		super("Change_This_Name");
-		// TODO Implement this
+	private int currTick =0;
+
+	public Q(String name) {
+		super(name);
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		subscribeBroadcast(TickBroadcast.class, (tickBroadcast) -> {
+			currTick = tickBroadcast.getTick();
+		});
+		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
+			terminate();
+		});
+		subscribeEvent(GadgetsAvailableEvent.class, (event) -> {
+			String gdg = event.getGadget();
+			if (Inventory.getInstance().getItem(gdg))
+			{
+				MessageBrokerImpl.getInstance().complete(event, currTick);
+			}
+			else
+				MessageBrokerImpl.getInstance().complete(event, -1);
+
+		});
 	}
 
 }

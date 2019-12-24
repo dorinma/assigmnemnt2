@@ -1,6 +1,17 @@
 package bgu.spl.mics.application.subscribers;
 
+import bgu.spl.mics.Future;
 import bgu.spl.mics.Subscriber;
+import bgu.spl.mics.application.messeges.AgentsAvailableEvent;
+import bgu.spl.mics.application.messeges.MissionRecievedEvent;
+import bgu.spl.mics.application.messeges.TerminateBroadcast;
+import bgu.spl.mics.application.messeges.TickBroadcast;
+import bgu.spl.mics.application.passiveObjects.Diary;
+import bgu.spl.mics.application.passiveObjects.MissionInfo;
+import bgu.spl.mics.application.passiveObjects.Report;
+import javafx.util.Pair;
+
+import java.util.LinkedList;
 
 /**
  * M handles ReadyEvent - fills a report and sends agents to mission.
@@ -10,14 +21,29 @@ import bgu.spl.mics.Subscriber;
  */
 public class M extends Subscriber {
 
-	public M() {
-		super("Change_This_Name");
+	private int currTick = 0;
+
+	public M(String name) {
+		super(name);
+
 		// TODO Implement this
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
+		subscribeBroadcast(TickBroadcast.class, (tickBroadcast) -> {
+			currTick = tickBroadcast.getTick();
+		});
+		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
+			terminate();
+		});
+
+		subscribeEvent(MissionRecievedEvent.class, (event) -> {
+			MissionInfo currMission = event.getMissionInfo();
+			Report currReport;
+			Future<Pair<String, LinkedList<String>>> agentsReturnedFutured = getSimplePublisher().sendEvent(new AgentsAvailableEvent(currMission.getSerialAgentsNumbers()));
+			Diary.getInstance().incrementTotal();
+		});
 		
 	}
 

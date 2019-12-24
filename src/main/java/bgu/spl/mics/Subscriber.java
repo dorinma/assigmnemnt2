@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import java.util.Map;
+
 /**
  * The Subscriber is an abstract class that any subscriber in the system
  * must extend. The abstract Subscriber class is responsible to get and
@@ -17,6 +19,7 @@ package bgu.spl.mics;
  */
 public abstract class Subscriber extends RunnableSubPub {
     private boolean terminated = false;
+    private Map<Class<? extends Message>, Callback> callbackMap;
 
     /**
      * @param name the Subscriber name (used mainly for debugging purposes -
@@ -48,7 +51,8 @@ public abstract class Subscriber extends RunnableSubPub {
      *                 queue.
      */
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
-        //TODO: implement this.
+        MessageBrokerImpl.getInstance().subscribeEvent(type, this);
+        callbackMap.put(type, callback);
     }
 
     /**
@@ -72,7 +76,8 @@ public abstract class Subscriber extends RunnableSubPub {
      *                 queue.
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
-        //TODO: implement this.
+        MessageBrokerImpl.getInstance().subscribeBroadcast(type, this);
+        callbackMap.put(type, callback);
     }
 
     /**
@@ -103,10 +108,21 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     @Override
     public final void run() {
-        initialize();
-        while (!terminated) {
-            System.out.println("NOT IMPLEMENTED!!!"); //TODO: you should delete this line :)
+        try {
+            initialize();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        while (!terminated) {
+            try{
+                Message msg = MessageBrokerImpl.getInstance().awaitMessage(this);
+                callbackMap.get(msg.getClass()).call(msg);
+            }
+            catch (InterruptedException ex){
+                ex.printStackTrace();
+            }
+        }
+        MessageBrokerImpl.getInstance().unregister(this);
     }
 
 }

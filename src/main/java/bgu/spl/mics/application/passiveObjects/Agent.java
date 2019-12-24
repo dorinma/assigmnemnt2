@@ -43,12 +43,19 @@ public class Agent {
 	}
 
 	//Acquires an agent.
-	public void acquire(){
+	public synchronized void acquire(){
+		while (!isAvailable())
+		{
+			try {
+				wait();
+			} catch (InterruptedException ex) {}
+		}
 		available = false;
 	} //agent is busy
 
 	//Releases an agent
-	public void release(){
+	public synchronized void release(){
 		available = true;
+		notifyAll();
 	} //agent is available
 }

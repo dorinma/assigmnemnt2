@@ -30,8 +30,12 @@ public class Future<T> {
      * 	       
      */
 	public T get() throws InterruptedException {
-		while (result == null)
-			this.wait();
+		while (result == null) {
+			try {
+				this.wait();
+			}
+			catch (InterruptedException ex) {}
+		}
 		return result;
 	}
 	
@@ -64,9 +68,19 @@ public class Future<T> {
      *         elapsed, return null.
      */
 	public T get(long timeout, TimeUnit unit) throws InterruptedException {
-		if (result == null)
-			this.wait(unit.toMillis(timeout));
+		if (result == null) {
+			try {
+				synchronized (this) {
+					unit.timedWait(this, timeout);
+				}
+			} catch (InterruptedException e) {
+			}
+			if (result == null)
+				return null;
+		}
 		return result;
 	}
-
 }
+
+
+

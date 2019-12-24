@@ -36,6 +36,7 @@ public class Squad {
 	 */
 	public void load (Agent[] agents) {
 		for(int i = 0; i < agents.length; i++) {
+			agents[i].release();
 			this.agents.put(agents[i].getSerialNumber(), agents[i]);
 		}
 	}
@@ -67,10 +68,21 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public boolean getAgents(List<String> serials) throws InterruptedException {
-		Collections.sort(serials); //to avoid deadlock
-		for (String s: serials
-			 ) {
+	public boolean getAgents(List<String> serials) { //TODO syncho
+
+		for (String s : serials) {
+			Agent a = agents.get(s);
+			if (a == null)
+				return false;
+			if (!agents.containsKey(a))
+				return false;
+		}
+		for (String a : serials) {
+			agents.get(a).acquire();
+		}
+		return true;
+				/*Collections.sort(serials); //to avoid deadlock
+		for (String s: serials) {
 			Agent a = agents.get(s);
 			if(a == null)
 				return false;
@@ -80,7 +92,7 @@ public class Squad {
 				a.acquire();
 			}
 		}
-		return true;
+		return true; */
 	}
 
     /**

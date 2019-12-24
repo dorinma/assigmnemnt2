@@ -1,6 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
-
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Passive object representing the diary where all reports are stored.
@@ -15,7 +15,7 @@ public class Diary {
 
 	private static Diary instance=null; //for thread safe singleton
 	private List<Report> reports;
-	int totalMissions;
+	static AtomicInteger totalMissions = new AtomicInteger();
 
 
 	public static synchronized Diary getInstance() {
@@ -30,26 +30,19 @@ public class Diary {
 
 	//adds a report to the diary
 	public void addReport(Report reportToAdd){
+		if (reportToAdd != null)
 		this.reports.add((reportToAdd)); }
 
-	/**
-	 *
-	 * <p>
-	 * Prints to a file name @filename a serialized object List<Report> which is a
-	 * List of all the reports in the diary.
-	 * This method is called by the main method in order to generate the output.
-	 */
 	public void printToFile(String filename){
 		//TODO: Implement this
 	}
 
-
 	//return the total number of received missions (executed / aborted) be all the M-instances
-	public int getTotal(){
+	public AtomicInteger getTotal(){
 		return this.totalMissions;
-	}
+	} //TODO check signiture
 
 	public void incrementTotal(){
-		this.totalMissions++;
+		this.totalMissions.incrementAndGet();
 	}
 }
