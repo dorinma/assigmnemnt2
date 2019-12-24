@@ -9,7 +9,7 @@ import bgu.spl.mics.application.messeges.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Diary;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
 import bgu.spl.mics.application.passiveObjects.Report;
-import javafx.util.Pair;
+//import javafx.util.Pair;
 
 import java.util.LinkedList;
 
@@ -38,11 +38,10 @@ public class M extends Subscriber {
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
 			terminate();
 		});
-
 		subscribeEvent(MissionRecievedEvent.class, (event) -> {
 			MissionInfo currMission = event.getMissionInfo();
 			Report currReport;
-			Future<Pair<String, LinkedList<String>>> agentsReturnedFutured = getSimplePublisher().sendEvent(new AgentsAvailableEvent(currMission.getSerialAgentsNumbers()));
+		//	Future<Pair<String, LinkedList<String>>> agentsReturnedFutured = getSimplePublisher().sendEvent(new AgentsAvailableEvent(currMission.getSerialAgentsNumbers()));
 			Diary.getInstance().incrementTotal();
 		});
 		

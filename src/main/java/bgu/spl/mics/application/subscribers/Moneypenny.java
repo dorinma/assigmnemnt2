@@ -27,7 +27,6 @@ public class Moneypenny extends Subscriber {
 
 	public Moneypenny(String name) {
 		super(name); //name is serialNumber
-		//this.serialNumber = serialNumber;
 	}
 
 	@Override
@@ -45,10 +44,13 @@ public class Moneypenny extends Subscriber {
 
 			if (allAgentsAvialible)
 			{
-				MessageBrokerImpl.getInstance().complete(event, currTick);
+				//MessageBrokerImpl.getInstance().complete(event, currTick);
+				complete(event, currTick);
 			}
-			else
-				MessageBrokerImpl.getInstance().complete(event, -1);
+			else {
+				//MessageBrokerImpl.getInstance().complete(event, -1);
+				complete(event, -1);
+			}
 
 		});
 

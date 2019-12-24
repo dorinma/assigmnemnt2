@@ -42,7 +42,7 @@ public class Intelligence extends Subscriber {
 			terminate();
 		});
 
-		while (missionList.size()>0 && missionList.get(0).getTimeIssued() <= currTick)
+		while (missionList.size() > 0 && missionList.get(0).getTimeIssued() <= currTick)
 		{
 			MissionInfo currMission = missionList.get(0);
 			missionList.remove(0);

@@ -17,11 +17,9 @@ import jdk.nashorn.internal.codegen.CompilerConstants;
  */
 public class Q extends Subscriber {
 
-	private int currTick =0;
+	private int currTick = 0;
 
-	public Q(String name) {
-		super(name);
-	}
+	public Q(String name) {	super(name); }
 
 	@Override
 	protected void initialize() {
@@ -35,10 +33,12 @@ public class Q extends Subscriber {
 			String gdg = event.getGadget();
 			if (Inventory.getInstance().getItem(gdg))
 			{
-				MessageBrokerImpl.getInstance().complete(event, currTick);
+				//MessageBrokerImpl.getInstance().complete(event, currTick);
+				complete(event, currTick); //TODO need to send result instead of tick
 			}
 			else
-				MessageBrokerImpl.getInstance().complete(event, -1);
+				//MessageBrokerImpl.getInstance().complete(event, -1);
+				complete(event, -1);
 
 		});
 	}

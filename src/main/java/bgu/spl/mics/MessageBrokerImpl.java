@@ -17,8 +17,8 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	private static MessageBrokerImpl instance = null;
 	private ConcurrentHashMap<Subscriber, ConcurrentLinkedQueue<Message>> subscribers; //sub - events/broadcast msg
-	private ConcurrentHashMap<Class<? extends Event>, ConcurrentLinkedQueue<Subscriber>> topics; //events(3) - sub
-	private ConcurrentHashMap<Event, Future> futures; //each event waits to return value;
+	private ConcurrentHashMap<Class<? extends Message>, ConcurrentLinkedQueue<Subscriber>> topics; //events(3) - sub
+	private ConcurrentHashMap<Event, Future> futures; //each event waits for return value
 
 	private MessageBrokerImpl() {
 		subscribers = new ConcurrentHashMap<>();
@@ -29,20 +29,34 @@ public class MessageBrokerImpl implements MessageBroker {
 	//Retrieves the single instance of this class
 	public static synchronized MessageBroker getInstance() {
 		if (instance == null)
-		instance = new MessageBrokerImpl();
+			instance = new MessageBrokerImpl();
 		return instance;
 	}
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
-		if(!topics.get(type).contains(m))
-			topics.get(type).add(m);
+		synchronized (topics.get(type)) {
+			if(topics.containsKey(type))
+				topics.get(type).add(m);
+			else {
+				ConcurrentLinkedQueue<Subscriber> subs = new ConcurrentLinkedQueue<>();
+				subs.add(m);
+				topics.put(type, subs);
+			}
+		}
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {
-		// TODO Auto-generated method stub
-
+		synchronized (topics.get(type)) {
+			if(topics.containsKey(type))
+				topics.get(type).add(m);
+			else {
+				ConcurrentLinkedQueue<Subscriber> subs = new ConcurrentLinkedQueue<>();
+				subs.add(m);
+				topics.put(type, subs);
+			}
+		}
 	}
 
 	@Override
