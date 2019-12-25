@@ -11,8 +11,8 @@ import java.util.List;
 public class Report {
 
 	private String missionName;
-	private String Mid;
-	private String MoneyPennyId;
+	private int Mid;
+	private int MoneyPennyId;
 	private List<String> agentsSerialNumbers;
 	private List<String> agentsNames;
 	private String gadgetName;
@@ -33,25 +33,25 @@ public class Report {
 
 
 	//Retrieves the M's id.
-	public String getM() {
+	public int getM() {
 		return Mid;
 	}
 
 
 	//Sets the M's id.
-	public void setM(String m) {
+	public void setM(int m) {
 		this.Mid = m;
 	}
 
 
 	//Retrieves the Moneypenny's id.
-	public String getMoneypenny() {
+	public int getMoneypenny() {
 		return this.MoneyPennyId;
 	}
 
 
 	//Sets the Moneypenny's id.
-	public void setMoneypenny(String moneypenny) {
+	public void setMoneypenny(int moneypenny) {
 		this.MoneyPennyId = moneypenny;
 	}
 

@@ -16,6 +16,7 @@ public class MI6Runner {
     public static JSONParser parser;
 
     public static void main(String[] args) {
+        System.out.println("gdcygff");
 
         /*
             parser = new JSONParser();

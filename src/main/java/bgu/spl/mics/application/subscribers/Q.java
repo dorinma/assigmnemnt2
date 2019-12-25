@@ -18,8 +18,12 @@ import jdk.nashorn.internal.codegen.CompilerConstants;
 public class Q extends Subscriber {
 
 	private int currTick = 0;
+	private static Integer id = 1;
 
-	public Q(String name) {	super(name); }
+	public Q() {
+		super(id.toString());
+		id++;
+	}
 
 	@Override
 	protected void initialize() {

@@ -27,8 +27,8 @@ public class Intelligence extends Subscriber {
 	private List<MissionInfo> missionList;
 	private int currTick;
 
-	public Intelligence(String name) {
-		super(name);
+	public Intelligence() {
+		super("");
 		Collections.sort(missionList, comparing(MissionInfo::getTimeIssued));
 	}
 
@@ -37,18 +37,24 @@ public class Intelligence extends Subscriber {
 
 		subscribeBroadcast(TickBroadcast.class, (tickBroadcast) -> {
 			currTick = tickBroadcast.getTick();
+
+			int count = 1;
+			while(missionList.size() > 0 & count!=missionList.size())
+			{
+				for (MissionInfo info : missionList) {
+					if (info.getTimeIssued() == currTick)
+					{
+						missionList.remove(info);
+						MissionRecievedEvent mre = new MissionRecievedEvent(info);
+						getSimplePublisher().sendEvent(mre);
+					}
+				}
+				count++;
+			}
 		});
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
 			terminate();
 		});
-
-		if (missionList.size() > 0 && missionList.get(0).getTimeIssued() <= currTick)
-		{
-			MissionInfo currMission = missionList.get(0);
-			missionList.remove(0);
-			MissionRecievedEvent mre = new MissionRecievedEvent(currMission);
-			getSimplePublisher().sendEvent(mre);
-		}
 	}
 
 }

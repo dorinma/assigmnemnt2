@@ -12,7 +12,7 @@ public class SendAgentsEvent implements Event {
         this.serialAgentsNames = serialAgentsNames;
     }
 
-    public List<String> getSerialAgentsNames(){
+    public List<String> getAgentsNames(){
         return serialAgentsNames;
     }
 

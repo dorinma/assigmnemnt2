@@ -16,36 +16,32 @@ import bgu.spl.mics.application.messeges.TickBroadcast;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends Publisher {
-
-
-	int duration;
-	int currTick = 0;
+	private int duration;
+	private int currTick;
 
 	public TimeService(int duration) {
 		super("TimeService");
 		this.duration = duration;
+		this.currTick = 0;
 	}
 
 	public int getDuration() { return duration; }
 
 	@Override
-	protected void initialize() {
+	protected void initialize() { run(); }
+
+	@Override
+	public void run() {
 		try {
 			while (currTick < duration) {
 				TickBroadcast tickBroadcast = new TickBroadcast(currTick);
-				MessageBrokerImpl.getInstance().sendBroadcast(tickBroadcast);
+				getSimplePublisher().sendBroadcast(tickBroadcast);
 				Thread.sleep(100);
 				currTick++;
 			}
 			TerminateBroadcast terminateBroadcast = new TerminateBroadcast();
-			MessageBrokerImpl.getInstance().sendBroadcast(terminateBroadcast);
+			getSimplePublisher().sendBroadcast(terminateBroadcast);
 		}
 		catch (InterruptedException ex) {}
 	}
-
-	@Override
-	public void run() {
-		// TODO Implement this
-	}
-
 }

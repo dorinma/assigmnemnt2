@@ -3,11 +3,10 @@ package bgu.spl.mics.application.subscribers;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.Subscriber;
 import bgu.spl.mics.application.messeges.*;
+import bgu.spl.mics.application.passiveObjects.Agent;
 import bgu.spl.mics.application.passiveObjects.Diary;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
 import bgu.spl.mics.application.passiveObjects.Report;
-//import javafx.util.Pair;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,11 +18,13 @@ import java.util.List;
  */
 public class M extends Subscriber {
 
+	private static Integer id = 1;
 	private int currTick = 0;
 	private int duration; //for entire program
 
-	public M(String name, int duration) { //TODO IN THE MAIN
-		super(name); // TODO fix names. in more places
+	public M(int duration) { //TODO IN THE MAIN
+		super(id.toString()); // TODO fix names. in more places
+		id++;
 		this.duration = duration;
 	}
 
@@ -36,44 +37,45 @@ public class M extends Subscriber {
 			terminate();
 		});
 
-		subscribeEvent(MissionRecievedEvent.class, (event)-> {
+		subscribeEvent(MissionRecievedEvent.class, (event) -> {
 			MissionInfo currMission = event.getMissionInfo();
-			if (currMission != null)
-			{
+			if (currMission != null) {
 				String gdg = currMission.getGadget();
 				Future<Integer> futGadget = getSimplePublisher().sendEvent(new GadgetsAvailableEvent(gdg));
-				if (futGadget.get() != -1)
-				{
+				if (futGadget.get() != -1) {
 					LinkedList<String> serialAgent = (LinkedList<String>) currMission.getSerialAgentsNumbers();
 					Future<Integer> futAgent = getSimplePublisher().sendEvent(new AgentsAvailableEvent(serialAgent));
-					if (futAgent.get() != -1)
-					{
-						if (currMission.getTimeIssued() == currTick && currMission.getDuration() + currTick <= this.duration)
-						{
-							SendAgentsEvent sendAgents = new SendAgentsEvent(currMission.getSerialAgentsNumbers());
-							if(sendAgents != null) {
-								Future<List<String>> agentsNames = getSimplePublisher().sendEvent(sendAgents);
-								Report currReport = new Report();
-								currReport.setMissionName(currMission.getMissionName());
-								currReport.setM("M" + this.getName());//TODO???
-								currReport.setMoneypenny(futAgent.get().toString());
-								currReport.setAgentsSerialNumbersNumber(serialAgent);
-								currReport.setAgentsNames(agentsNames.get());
-								currReport.setGadgetName(gdg);
-								currReport.setQTime(futGadget.get());
-								currReport.setTimeIssued(currMission.getTimeIssued());
-								currReport.setQTime(futGadget.get());
-								currReport.setTimeCreated(currTick);
-								Diary.getInstance().addReport(currReport);
-							}
-						}
-						else {
+					if (futAgent.get() != -1) {
+						if (currMission.getTimeIssued() == currTick && currMission.getDuration() + currTick <= this.duration) { //TODO to decide what to do
+							subscribeEvent(SendAgentsEvent.class, (eventNames) -> {
+								List<String> agentsNamesList = eventNames.getAgentsNames();
+								if (agentsNamesList != null) {
+									//Future<List<String>> agentsNames = getSimplePublisher().sendEvent(agentsNamesList);
+									Report currReport = new Report();
+									currReport.setMissionName(currMission.getMissionName());
+									currReport.setM(this.id);
+									currReport.setMoneypenny(futAgent.get());
+									currReport.setAgentsSerialNumbersNumber(serialAgent);
+									currReport.setAgentsNames(agentsNamesList); //TODO to ask tomer
+									currReport.setGadgetName(gdg);
+									currReport.setTimeIssued(currMission.getTimeIssued());
+									currReport.setQTime(futGadget.get());
+									currReport.setTimeCreated(currTick);
+									Diary.getInstance().addReport(currReport);
+
+									//TODO needs to wait entire duration and after relase agents
+								}
+							});
+							//SendAgentsEvent sendAgents = new SendAgentsEvent(currMission.getSerialAgentsNumbers());
+
+						} else {
 							ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
 						}
+
 					}
 				}
-			}
 
+			}
 		});
 	}
 }

@@ -2,10 +2,7 @@ package bgu.spl.mics.application.subscribers;
 
 import bgu.spl.mics.MessageBrokerImpl;
 import bgu.spl.mics.Subscriber;
-import bgu.spl.mics.application.messeges.AgentsAvailableEvent;
-import bgu.spl.mics.application.messeges.GadgetsAvailableEvent;
-import bgu.spl.mics.application.messeges.TerminateBroadcast;
-import bgu.spl.mics.application.messeges.TickBroadcast;
+import bgu.spl.mics.application.messeges.*;
 import bgu.spl.mics.application.passiveObjects.Agent;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.Squad;
@@ -23,15 +20,16 @@ import java.util.LinkedList;
 public class Moneypenny extends Subscriber {
 
 	private String serialNumber;
-	private int currTick = 0;
+	private static Integer id = 1;
+	private int tick = 0;
 
-	public Moneypenny(String name) {
-		super(name); //name is serialNumber
+	public Moneypenny() {
+		super(id.toString());
+		id++;
 	}
 
 	@Override
 	protected void initialize() {
-
 		subscribeBroadcast(TickBroadcast.class, (tickBroadcast) -> {
 			currTick = tickBroadcast.getTick();
 		});
@@ -43,12 +41,13 @@ public class Moneypenny extends Subscriber {
 			boolean allAgentsAvialible = Squad.getInstance().getAgents(agentList);
 			if (allAgentsAvialible)
 			{
-				complete(event, currTick);
+				getSimplePublisher().sendEvent(new SendAgentsEvent(Squad.getInstance().getAgentsNames(agentList)));
+				//Pair<Integer, LinkedList<Agent>> futMoneypenny = new Pair(currTick, Squad.getInstance().getAgentsNames(agentList));
+				complete(event, id);
 			}
 			else {
 				complete(event, -1);
 			}
-
 		});
 
 	}
