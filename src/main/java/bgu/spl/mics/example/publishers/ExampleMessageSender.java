@@ -29,6 +29,8 @@ public class ExampleMessageSender extends Subscriber {
             System.out.println("Sender " + getName() + " publish an event and terminate");
             terminate();
         } else {
+           // System.out.println("reached to sending point");
+
             Future<String> futureObject = getSimplePublisher().sendEvent(new ExampleEvent(getName()));
             if (futureObject != null) {
             	String resolved = futureObject.get(100, TimeUnit.MILLISECONDS);

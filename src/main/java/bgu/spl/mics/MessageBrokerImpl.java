@@ -17,10 +17,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MessageBrokerImpl implements MessageBroker {
 
-	private static MessageBrokerImpl instance = null;
-	private ConcurrentHashMap<Subscriber, LinkedBlockingQueue<Message>> subscribers; //sub - events/broadcast msg
+	private static MessageBrokerImpl instance = new MessageBrokerImpl();
+	private ConcurrentHashMap<Subscriber, ConcurrentLinkedQueue<Message>> subscribers; //sub - events/broadcast msg
 	private ConcurrentHashMap<Class<? extends Message>, ConcurrentLinkedQueue<Subscriber>> topics; //events(3) - sub
 	private ConcurrentHashMap<Event, Future> futures; //each event waits for return value
+
+	private static class SingletonHolder{
+		private static MessageBrokerImpl instance = new MessageBrokerImpl();
+	}
 
 	private MessageBrokerImpl() {
 		subscribers = new ConcurrentHashMap<>();
@@ -29,14 +33,14 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	//Retrieves the single instance of this class
-	public static synchronized MessageBroker getInstance() {
+	public static MessageBroker getInstance() { //SYNC
 		if (instance == null)
 			instance = new MessageBrokerImpl();
 		return instance;
 	}
 
 	@Override
-	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
+	public synchronized <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
 	//	synchronized (topics.get(type)) {
 			if(topics.containsKey(type))
 				topics.get(type).add(m);
@@ -45,11 +49,18 @@ public class MessageBrokerImpl implements MessageBroker {
 				subs.add(m);
 				topics.put(type, subs);
 			}
+	//	for (Class<? extends Message> eve : topics.keySet() ) {
+	//		System.out.println(eve.getName());
+	//		for (Subscriber s : topics.get(eve) ) {
+	//			System.out.print(s.getName() + " ,");
+	//			System.out.println();
+	//		}
+	//	}
 	//	}
 	}
 
 	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {
+	public synchronized void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {
 
 		if (topics.containsKey(type))
 			topics.get(type).add(m);
@@ -64,60 +75,65 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	@Override
-	public <T> void complete(Event<T> e, T result) {
-		if(futures.containsKey(e)){
-			futures.get(e).resolve(result);
-		}
+	public synchronized  <T> void complete(Event<T> e, T result) {
+		futures.get(e).resolve(result);
+		futures.remove(e);
 	}
 
 	@Override
-	public void sendBroadcast(Broadcast b) {
+	public synchronized void sendBroadcast(Broadcast b) {
 		if (topics.get(b.getClass()) != null)
 		{
 			for (Subscriber sub : topics.get(b.getClass())) {
-				try {
-					subscribers.get(sub).put(b);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+					subscribers.get(sub).add(b);
 			}
+			this.notifyAll();
 		}
 	}
 
 	
 	@Override
-	public <T> Future<T> sendEvent(Event<T> e) {
-		//	synchronized (topics.get(e.getClass())) {
-		if (topics.get(e) != null) {
-			Subscriber sub = topics.get(e).poll(); //we found the first sub that is registered to this type of event
-			if (sub == null)
-				return null;
-			else {
+	public synchronized  <T> Future<T> sendEvent(Event<T> e) {
+		Future<T> future = null;
+	//	System.out.println("im trying to send event");
+		//for (Class<? extends Message> eve : topics.keySet() ) {
+		//	System.out.println(eve.getName());
+		//	for (Subscriber s : topics.get(eve) ) {
+		//		System.out.print(s.getName() + " ,");
+		//		System.out.println();
+		//	}
+		//}
+		//System.out.println(e.getClass());
+		if (topics.containsKey(e.getClass())) {
+			//System.out.println("found the event");
+			Subscriber sub = topics.get(e.getClass()).poll(); //we found the first sub that is registered to this type of event
+			if (sub != null){
+				//System.out.println("found the sub");
 				subscribers.get(sub).add(e); //will go to subscribers map and add to this sub this event
-				topics.get(e).add(sub);
-				Future<T> future = new Future<>();
+				topics.get(e.getClass()).add(sub);
+				future = new Future<>();
 				futures.put(e, future);
-				return future;
+				//his.notifyAll();
 			}
 		}
-		//	}
-		return null;
+		this.notifyAll();
+		return future;
 	}
 
 	@Override
 	public void register(Subscriber m) {
 		if(!subscribers.containsKey(m)) {
-			subscribers.put(m, new LinkedBlockingQueue<>()); //new subscriber
+			subscribers.put(m, new ConcurrentLinkedQueue<>()); //new subscriber
 		}
 	}
 
 	@Override
 	public void unregister(Subscriber m) {
-		LinkedBlockingQueue<Message> mEvents = subscribers.get(m);
-		for (Message msg : mEvents) { //remove m from topics
+		//ConcurrentHashMap<Message> mEvents = subscribers.get(m);
+		for (Class<? extends Message> msg : topics.keySet()) { //remove m from topics
+			if(topics.get(msg).contains(m))
 			topics.get(msg).remove(m);
 		}
-
 		if(subscribers.containsKey(m)) {
 			subscribers.remove(m);
 		}
@@ -125,7 +141,16 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public Message awaitMessage(Subscriber m) throws InterruptedException {
-		return subscribers.get(m).take();
+		Message msg;
+		synchronized (this)
+		{
+			while (subscribers.get(m).isEmpty())
+			{
+				this.wait();
+			}
+			msg = subscribers.get(m).poll();
+		}
+		return msg;
 	}
 
 }

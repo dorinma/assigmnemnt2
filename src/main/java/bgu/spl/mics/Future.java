@@ -13,12 +13,16 @@ import java.util.concurrent.TimeUnit;
 public class Future<T> {
 
 	T result;
+	boolean complete;
+
 
 	/**
 	 * This should be the the only public constructor in this class.
 	 */
-	public Future() {
+	public Future()
+	{
 		result = null;
+		complete = false;
 	}
 	
 	/**
@@ -30,6 +34,7 @@ public class Future<T> {
      * 	       
      */
 	public T get() {
+		//return this.result;
 		while (result == null) {
 			try {
 				this.wait();
@@ -44,16 +49,14 @@ public class Future<T> {
      */
 	public void resolve (T result) {
 		this.result = result;
-		this.notifyAll();
+		complete = true;
 	}
 	
 	/**
      * @return true if this object has been resolved, false otherwise
      */
 	public boolean isDone() {
-		if(result != null)
-			return true;
-		return false;
+		return this.complete;
 	}
 	
 	/**
@@ -68,7 +71,7 @@ public class Future<T> {
      *         elapsed, return null.
      */
 	public T get(long timeout, TimeUnit unit)  {
-		timeout = TimeUnit.MILLISECONDS.convert(timeout, unit); //convert to mili seconds
+		timeout = TimeUnit.MILLISECONDS.convert(timeout, unit); //convert to milli seconds
 		if (result == null) {
 			try {
 				synchronized (this) {
@@ -80,6 +83,16 @@ public class Future<T> {
 				return null;
 		}
 		return result;
+		/*while (!isDone())
+		{
+			System.out.println("5 is waiting?");
+			try
+			{
+				unit.sleep(timeout);
+			}
+			catch (InterruptedException ex){}
+		}
+		return result;*/
 	}
 }
 

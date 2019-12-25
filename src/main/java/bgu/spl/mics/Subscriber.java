@@ -104,10 +104,7 @@ public abstract class Subscriber extends RunnableSubPub {
         this.terminated = true;
     }
 
-    /**
-     * The entry point of the Subscriber. TODO: you must complete this code
-     * otherwise you will end up in an infinite loop.
-     */
+
     @Override
     public final void run() {
         try {
@@ -125,7 +122,7 @@ public abstract class Subscriber extends RunnableSubPub {
                 ex.printStackTrace();
             }
         }
-       // MessageBrokerImpl.getInstance().unregister(this);
+        MessageBrokerImpl.getInstance().unregister(this);
     }
 
 }
