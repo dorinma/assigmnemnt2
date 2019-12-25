@@ -67,7 +67,7 @@ public class Future<T> {
      * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
      *         elapsed, return null.
      */
-	public T get(long timeout, TimeUnit unit) throws InterruptedException {
+	public T get(long timeout, TimeUnit unit)  {
 		timeout = TimeUnit.MILLISECONDS.convert(timeout, unit); //convert to mili seconds
 		if (result == null) {
 			try {

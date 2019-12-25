@@ -21,7 +21,7 @@ public class Moneypenny extends Subscriber {
 
 	private String serialNumber;
 	private static Integer id = 1;
-	private int tick = 0;
+	private int currTick = 0;
 
 	public Moneypenny() {
 		super(id.toString());

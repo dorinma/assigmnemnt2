@@ -1,5 +1,6 @@
 package bgu.spl.mics;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,6 +28,7 @@ public abstract class Subscriber extends RunnableSubPub {
      */
     public Subscriber(String name) {
         super(name);
+        callbackMap = new HashMap<>();
     }
 
     /**
@@ -109,6 +111,7 @@ public abstract class Subscriber extends RunnableSubPub {
     @Override
     public final void run() {
         try {
+            MessageBrokerImpl.getInstance().register(this);
             initialize();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -122,7 +125,7 @@ public abstract class Subscriber extends RunnableSubPub {
                 ex.printStackTrace();
             }
         }
-        MessageBrokerImpl.getInstance().unregister(this);
+       // MessageBrokerImpl.getInstance().unregister(this);
     }
 
 }

@@ -1,7 +1,7 @@
 package bgu.spl.mics.application;
 
 import bgu.spl.mics.application.passiveObjects.Inventory;
-import jdk.nashorn.internal.parser.JSONParser;
+//import jdk.nashorn.internal.parser.JSONParser;
 
 import java.io.FileReader;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 public class MI6Runner {
 
     public static String fileName;
-    public static JSONParser parser;
+  //  public static JSONParser parser;
 
     public static void main(String[] args) {
         System.out.println("gdcygff");

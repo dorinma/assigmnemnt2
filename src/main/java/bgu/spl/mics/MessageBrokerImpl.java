@@ -7,6 +7,8 @@ import java.util.Queue;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The {@link MessageBrokerImpl class is the implementation of the MessageBroker interface.
@@ -16,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MessageBrokerImpl implements MessageBroker {
 
 	private static MessageBrokerImpl instance = null;
-	private ConcurrentHashMap<Subscriber, ConcurrentLinkedQueue<Message>> subscribers; //sub - events/broadcast msg
+	private ConcurrentHashMap<Subscriber, LinkedBlockingQueue<Message>> subscribers; //sub - events/broadcast msg
 	private ConcurrentHashMap<Class<? extends Message>, ConcurrentLinkedQueue<Subscriber>> topics; //events(3) - sub
 	private ConcurrentHashMap<Event, Future> futures; //each event waits for return value
 
@@ -35,7 +37,7 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
-		synchronized (topics.get(type)) {
+	//	synchronized (topics.get(type)) {
 			if(topics.containsKey(type))
 				topics.get(type).add(m);
 			else {
@@ -43,20 +45,22 @@ public class MessageBrokerImpl implements MessageBroker {
 				subs.add(m);
 				topics.put(type, subs);
 			}
-		}
+	//	}
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, Subscriber m) {
-		synchronized (topics.get(type)) {
-			if(topics.containsKey(type))
-				topics.get(type).add(m);
-			else {
+
+		if (topics.containsKey(type))
+			topics.get(type).add(m);
+
+	//	synchronized (topics.get(type)) {
+			if (!topics.containsKey(type)) {
 				ConcurrentLinkedQueue<Subscriber> subs = new ConcurrentLinkedQueue<>();
 				subs.add(m);
 				topics.put(type, subs);
 			}
-		}
+	//	}
 	}
 
 	@Override
@@ -68,15 +72,23 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		for (Subscriber sub: topics.get(b.getClass())) {
-			subscribeBroadcast(b.getClass(), sub);
+		if (topics.get(b.getClass()) != null)
+		{
+			for (Subscriber sub : topics.get(b.getClass())) {
+				try {
+					subscribers.get(sub).put(b);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		synchronized (topics.get(e.getClass())) {
+		//	synchronized (topics.get(e.getClass())) {
+		if (topics.get(e) != null) {
 			Subscriber sub = topics.get(e).poll(); //we found the first sub that is registered to this type of event
 			if (sub == null)
 				return null;
@@ -88,18 +100,20 @@ public class MessageBrokerImpl implements MessageBroker {
 				return future;
 			}
 		}
+		//	}
+		return null;
 	}
 
 	@Override
 	public void register(Subscriber m) {
 		if(!subscribers.containsKey(m)) {
-			subscribers.put(m, new ConcurrentLinkedQueue()); //new subscriber
+			subscribers.put(m, new LinkedBlockingQueue<>()); //new subscriber
 		}
 	}
 
 	@Override
 	public void unregister(Subscriber m) {
-		ConcurrentLinkedQueue<Message> mEvents = subscribers.get(m);
+		LinkedBlockingQueue<Message> mEvents = subscribers.get(m);
 		for (Message msg : mEvents) { //remove m from topics
 			topics.get(msg).remove(m);
 		}
@@ -110,8 +124,8 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	@Override
-	public Message awaitMessage(Subscriber m) {
-		return subscribers.get(m).poll();
+	public Message awaitMessage(Subscriber m) throws InterruptedException {
+		return subscribers.get(m).take();
 	}
 
 }
