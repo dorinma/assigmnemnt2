@@ -32,6 +32,10 @@ public class Intelligence extends Subscriber {
 		Collections.sort(missionList, comparing(MissionInfo::getTimeIssued));
 	}
 
+	public void setMissions(List<MissionInfo> missionList) {
+		this.missionList = missionList;
+	}
+
 	@Override
 	protected void initialize() throws InterruptedException {
 

@@ -23,7 +23,7 @@ public class M extends Subscriber {
 	private int duration; //for entire program
 
 	public M(int duration) { //TODO IN THE MAIN
-		super(id.toString()); // TODO fix names. in more places
+		super(id.toString());
 		id++;
 		this.duration = duration;
 	}
@@ -63,7 +63,7 @@ public class M extends Subscriber {
 									currReport.setTimeCreated(currTick);
 									Diary.getInstance().addReport(currReport);
 
-									//TODO needs to wait entire duration and after relase agents
+									//TODO needs to wait entire duration and after release agents
 								}
 							});
 							//SendAgentsEvent sendAgents = new SendAgentsEvent(currMission.getSerialAgentsNumbers());
@@ -71,10 +71,8 @@ public class M extends Subscriber {
 						} else {
 							ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
 						}
-
 					}
 				}
-
 			}
 		});
 	}
