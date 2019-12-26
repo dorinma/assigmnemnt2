@@ -9,7 +9,6 @@ import bgu.spl.mics.application.passiveObjects.Diary;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
 import bgu.spl.mics.application.passiveObjects.Report;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -27,13 +26,13 @@ public class Intelligence extends Subscriber {
 	private List<MissionInfo> missionList;
 	private int currTick;
 
-	public Intelligence() {
-		super("");
-		Collections.sort(missionList, comparing(MissionInfo::getTimeIssued));
+	public Intelligence(String name) {
+		super(name);
 	}
 
-	public void setMissions(List<MissionInfo> missionList) {
+	public void loadMissions(List<MissionInfo> missionList) {
 		this.missionList = missionList;
+		Collections.sort(missionList, comparing(MissionInfo::getTimeIssued));
 	}
 
 	@Override

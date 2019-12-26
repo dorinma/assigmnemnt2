@@ -20,12 +20,12 @@ import java.util.LinkedList;
 public class Moneypenny extends Subscriber {
 
 	private String serialNumber;
-	private static Integer id = 1;
+	//private static Integer id = 1;
 	private int currTick = 0;
 
-	public Moneypenny() {
-		super(id.toString());
-		id++;
+	public Moneypenny(String name) {
+		super(name);
+		//id++;
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class Moneypenny extends Subscriber {
 			{
 				getSimplePublisher().sendEvent(new SendAgentsEvent(Squad.getInstance().getAgentsNames(agentList)));
 				//Pair<Integer, LinkedList<Agent>> futMoneypenny = new Pair(currTick, Squad.getInstance().getAgentsNames(agentList));
-				complete(event, id);
+				complete(event, getName());
 			}
 			else {
 				complete(event, -1);

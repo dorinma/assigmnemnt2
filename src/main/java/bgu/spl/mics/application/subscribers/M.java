@@ -19,14 +19,21 @@ import java.util.List;
 public class M extends Subscriber {
 
 	private static Integer id = 1;
-	private int currTick = 0;
+	private int currTick;
 	private int duration; //for entire program
+	//TODO NOR GOOOOOOOOOD
 
-	public M(int duration) { //TODO IN THE MAIN
-		super(id.toString());
-		id++;
-		this.duration = duration;
+	public M (String name)
+	{
+		super(name);
+		currTick = 0;
 	}
+//
+//	public M(int duration) { //TODO IN THE MAIN
+//		super(id.toString());
+//		id++;
+//		this.duration = duration;
+//	}
 
 	@Override
 	protected void initialize() {
