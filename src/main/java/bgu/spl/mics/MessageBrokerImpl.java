@@ -41,7 +41,6 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public synchronized <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
-	//	synchronized (topics.get(type)) {
 			if(topics.containsKey(type))
 				topics.get(type).add(m);
 			else {
@@ -49,14 +48,6 @@ public class MessageBrokerImpl implements MessageBroker {
 				subs.add(m);
 				topics.put(type, subs);
 			}
-	//	for (Class<? extends Message> eve : topics.keySet() ) {
-	//		System.out.println(eve.getName());
-	//		for (Subscriber s : topics.get(eve) ) {
-	//			System.out.print(s.getName() + " ,");
-	//			System.out.println();
-	//		}
-	//	}
-	//	}
 	}
 
 	@Override
@@ -65,19 +56,16 @@ public class MessageBrokerImpl implements MessageBroker {
 		if (topics.containsKey(type))
 			topics.get(type).add(m);
 
-	//	synchronized (topics.get(type)) {
-			if (!topics.containsKey(type)) {
+		if (!topics.containsKey(type)) {
 				ConcurrentLinkedQueue<Subscriber> subs = new ConcurrentLinkedQueue<>();
 				subs.add(m);
 				topics.put(type, subs);
 			}
-	//	}
 	}
 
 	@Override
 	public synchronized  <T> void complete(Event<T> e, T result) {
 		futures.get(e).resolve(result);
-		//futures.get(e).isDone();
 		futures.remove(e);
 	}
 
@@ -96,27 +84,17 @@ public class MessageBrokerImpl implements MessageBroker {
 	@Override
 	public synchronized  <T> Future<T> sendEvent(Event<T> e) {
 		Future<T> future = null;
-	//	System.out.println("im trying to send event");
-		//for (Class<? extends Message> eve : topics.keySet() ) {
-		//	System.out.println(eve.getName());
-		//	for (Subscriber s : topics.get(eve) ) {
-		//		System.out.print(s.getName() + " ,");
-		//		System.out.println();
-		//	}
-		//}
-		//System.out.println(e.getClass());
+
 		if (topics.containsKey(e.getClass())) {
-			//System.out.println("found the event");
 			Subscriber sub = topics.get(e.getClass()).poll(); //we found the first sub that is registered to this type of event
 			if (sub != null){
-				//System.out.println("found the sub");
 				subscribers.get(sub).add(e); //will go to subscribers map and add to this sub this event
 				topics.get(e.getClass()).add(sub);
 				future = new Future<>();
 				futures.put(e, future);
 				System.out.println(sub.getName());
 				System.out.println(e.getClass().getName());
-				//his.notifyAll();
+				this.notifyAll();
 			}
 		}
 		this.notifyAll();
@@ -132,7 +110,6 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public void unregister(Subscriber m) {
-		//ConcurrentHashMap<Message> mEvents = subscribers.get(m);
 		for (Class<? extends Message> msg : topics.keySet()) { //remove m from topics
 			if(topics.get(msg).contains(m))
 			topics.get(msg).remove(m);

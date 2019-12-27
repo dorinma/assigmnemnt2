@@ -45,20 +45,19 @@ public class Moneypenny extends Subscriber {
 				System.out.println(s);
 			}
 			boolean allAgentsAvialible = Squad.getInstance().getAgents(agentList);
-			System.out.println(agentList.size());
+		//	System.out.println(agentList.size());
 
 			if (allAgentsAvialible)
 			{
 				//Squad.getInstance().sendAgents(agentList, 2);
-				System.out.println(",ponnypenny is about to send avialibel agents");
+				System.out.println("monnypenny is about to send avialibel agents");
 				getSimplePublisher().sendEvent(new SendAgentsEvent(Squad.getInstance().getAgentsNames(agentList)));
 				//Pair<Integer, LinkedList<Agent>> futMoneypenny = new Pair(currTick, Squad.getInstance().getAgentsNames(agentList));
 				SendAgentsEvent sendAgentsEvent = new SendAgentsEvent(agentList);
 				complete(sendAgentsEvent, getName());
 			}
 			else {
-				System.out.println(",ponnypenny is about to NOT AV agents");
-
+				System.out.println("monnypenny did not found these agents agents");
 				complete(event, "NOT EVEYONE ARE EVILIABLE");
 			}
 		});

@@ -34,7 +34,7 @@ public class MI6Runner {
         long counterThreads = 0;
 
         try {
-            FileReader reader = new FileReader("C:/Users/hadas zeira/Desktop/Software Engineering/SemesterC/spl/assignment2/assigmnemnt2/src/main/java/bgu/spl/mics/application/input.json");
+            FileReader reader = new FileReader(args[0]);
             JSONObject jsonObject = (JSONObject) parser.parse(reader);
 
             //---------Inventory---------
@@ -117,18 +117,20 @@ public class MI6Runner {
                 allProgThreads.add(new Thread(currIntelegence));
             }
 
-            //---------אtime---------
+            //--------אtime---------
             long progDuration = (Long)jaServices.get("time");
             TimeService timeService = new TimeService((int)progDuration);
            // ((LinkedList<Thread>) allProgThreads).addFirst(new Thread(timeService));
 
             for (Thread t : allProgThreads) {
                 t.start();
-/*                try {
-                    countDownLatch.await();
-                } catch (InterruptedException e) {
-                }*/
             }
+
+            try {
+                countDownLatch.await();
+                System.out.println("threds that need to initilialize" + countDownLatch.getCount());
+            }
+            catch (InterruptedException e) { }
             Thread timeServiceThread = new Thread(timeService);
             timeServiceThread.start();
 

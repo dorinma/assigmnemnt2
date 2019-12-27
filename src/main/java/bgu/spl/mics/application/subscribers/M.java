@@ -64,7 +64,7 @@ public class M extends Subscriber {
 
 
 						System.out.println(futAgent.get());
-						if (!futAgent.get().equals("")) { //!futAgent.get().equals("")
+						if ( !futAgent.get().equals("")) { //!futAgent.get().equals("")
 								System.out.println("agents for this mission are avialible !!!!!!!!!");
 							//	if (currMission.getTimeIssued() == currTick ) { //TODO to decide what to do =====&& currMission.getDuration() + currTick <= this.duration
 									subscribeEvent(SendAgentsEvent.class, (eventNames) -> {
@@ -91,7 +91,13 @@ public class M extends Subscriber {
 									//SendAgentsEvent sendAgents = new SendAgentsEvent(currMission.getSerialAgentsNumbers());
 
 								} else {
-									ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
+							System.out.println("trying to release agents");
+
+							ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
+									System.out.println("trying to release agents");
+									//complete(releseAgents, 3);
+								//	getSimplePublisher().sendEvent(releseAgents);
+								//	notifyAll();
 								}
 							}
 						}

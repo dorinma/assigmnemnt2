@@ -35,7 +35,7 @@ public class Intelligence extends Subscriber {
 	}
 
 	@Override
-	protected void initialize() throws InterruptedException {
+	protected void initialize()  {
 
 		subscribeBroadcast(TickBroadcast.class, (tickBroadcast) -> {
 			currTick = tickBroadcast.getTick();
@@ -46,10 +46,12 @@ public class Intelligence extends Subscriber {
 				for (MissionInfo info : missionList) {
 					if (info.getTimeIssued() == currTick)
 					{
+						System.out.println("the mission " + info.getMissionName() + " is going to get published on tick " + currTick);
 						missionList.remove(info);
 						MissionRecievedEvent mre = new MissionRecievedEvent(info);
 						getSimplePublisher().sendEvent(mre);
-						//complete(mre, 1);
+						complete(mre, 1);
+						notifyAll();
 						System.out.println(this.getName() + " sent event " + mre.getMissionInfo().getMissionName());
 					}
 				}
