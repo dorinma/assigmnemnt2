@@ -6,7 +6,7 @@ import bgu.spl.mics.application.passiveObjects.Agent;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ReleseAgents implements Event {
+public class ReleseAgents implements Event<Boolean> {
 
     List<String> agentsNumbers;
 

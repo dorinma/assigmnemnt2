@@ -16,8 +16,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 /** This is the Main class of the application. You should parse the input file,
  * create the different instances of the objects, and run the system.
@@ -30,12 +29,13 @@ public class MI6Runner {
     public static void main(String[] args) {
         JSONParser parser = new JSONParser();
 
-        List<Thread> allProgThreads = new LinkedList<>();
+       // List<Thread> allProgThreads = new LinkedList<>();
         long counterThreads = 0;
 
         try {
             FileReader reader = new FileReader(args[0]);
             JSONObject jsonObject = (JSONObject) parser.parse(reader);
+
 
             //---------Inventory---------
             JSONArray jaInventory = (JSONArray)jsonObject.get("inventory");
@@ -66,20 +66,26 @@ public class MI6Runner {
 
             //---------Q---------
             Q singleProgQ = new Q("Q", countDownLatch);
-            allProgThreads.add(new Thread(singleProgQ));
+            ExecutorService QIntelligenceExe = Executors.newCachedThreadPool();
+            QIntelligenceExe.submit(singleProgQ);
+           // allProgThreads.add(new Thread(singleProgQ));
 
             //---------M---------
             long counterM = (Long)jaServices.get("M");
+            ExecutorService MExe = Executors.newCachedThreadPool();
             for (int i=0; i<counterM; i++) {
                 M newM = new M("M"+(i+1), countDownLatch);
-                allProgThreads.add(new Thread(newM));
+                MExe.submit(newM);
+                //allProgThreads.add(new Thread(newM));
             }
 
             //---------Moneypenny---------
             long counterMoneypenny = (Long)jaServices.get("Moneypenny");
+            ExecutorService MonneypennyExe = Executors.newCachedThreadPool();
             for (int i=0; i<counterMoneypenny; i++) {
                 Moneypenny newMoneypenny = new Moneypenny("Moneypenny"+(i+1), countDownLatch);
-                allProgThreads.add(new Thread(newMoneypenny));
+                MonneypennyExe.submit(newMoneypenny);
+                //allProgThreads.add(new Thread(newMoneypenny));
             }
 
             //---Intelligence---
@@ -114,7 +120,8 @@ public class MI6Runner {
                     currIntellegenceMissions.add(currMission);
                 }
                 currIntelegence.loadMissions(currIntellegenceMissions);
-                allProgThreads.add(new Thread(currIntelegence));
+                QIntelligenceExe.submit(currIntelegence);
+              //  allProgThreads.add(new Thread(currIntelegence));
             }
 
             //--------אtime---------
@@ -122,22 +129,35 @@ public class MI6Runner {
             TimeService timeService = new TimeService((int)progDuration);
            // ((LinkedList<Thread>) allProgThreads).addFirst(new Thread(timeService));
 
-            for (Thread t : allProgThreads) {
-                t.start();
-            }
+          //  for (Thread t : allProgThreads) {
+            //    t.start();
+            //}
+
 
             try {
                 countDownLatch.await();
                 System.out.println("threds that need to initilialize" + countDownLatch.getCount());
             }
-            catch (InterruptedException e) { }
-            Thread timeServiceThread = new Thread(timeService);
-            timeServiceThread.start();
+            catch (InterruptedException e) {}
+            QIntelligenceExe.submit(timeService);
+
+            //Thread timeServiceThread = new Thread(timeService);
+            //timeServiceThread.start();
+
+            QIntelligenceExe.shutdown(); //will no longer recive new threads
+            QIntelligenceExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS); //first show down all this threds exe
+            MonneypennyExe.shutdown();
+            MonneypennyExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+            MExe.shutdown();
+            MExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+
 
 
         } catch (ParseException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

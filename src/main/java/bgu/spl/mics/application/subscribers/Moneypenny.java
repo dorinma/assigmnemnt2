@@ -9,6 +9,7 @@ import bgu.spl.mics.application.passiveObjects.Squad;
 
 import java.awt.*;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -20,13 +21,14 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Moneypenny extends Subscriber {
 
-	private String serialNumber;
+	private int serialNumber;
 	private CountDownLatch countDownLatch;
 	//private static Integer id = 1;
 	private int currTick = 0;
 
 	public Moneypenny(String name, CountDownLatch countDownLatch) {
 		super(name);
+		serialNumber = Integer.parseInt(name.substring(10));
 		this.countDownLatch = countDownLatch;
 	}
 
@@ -36,31 +38,41 @@ public class Moneypenny extends Subscriber {
 			currTick = tickBroadcast.getTick();
 		});
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
+			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();
 		});
 		subscribeEvent(AgentsAvailableEvent.class, (event) -> {
-			LinkedList <String> agentList = (LinkedList)event.getAgents();
-			for (String s:agentList
-				 ) {
-				System.out.println(s);
-			}
+			List<String> agentList = (LinkedList)event.getAgents();
+//			for (String s:agentList) {
+//				System.out.println(s);
+//			}
 			boolean allAgentsAvialible = Squad.getInstance().getAgents(agentList);
-		//	System.out.println(agentList.size());
 
 			if (allAgentsAvialible)
 			{
-				//Squad.getInstance().sendAgents(agentList, 2);
 				System.out.println("monnypenny is about to send avialibel agents");
-				getSimplePublisher().sendEvent(new SendAgentsEvent(Squad.getInstance().getAgentsNames(agentList)));
-				//Pair<Integer, LinkedList<Agent>> futMoneypenny = new Pair(currTick, Squad.getInstance().getAgentsNames(agentList));
-				SendAgentsEvent sendAgentsEvent = new SendAgentsEvent(agentList);
-				complete(sendAgentsEvent, getName());
+				List<String> result = Squad.getInstance().getAgentsNames(agentList);
+				complete(event, this.serialNumber);
 			}
 			else {
 				System.out.println("monnypenny did not found these agents agents");
-				complete(event, "NOT EVEYONE ARE EVILIABLE");
+				complete(event, -1);
 			}
 		});
+
+		subscribeEvent(SendAgentsEvent.class, (event) -> {
+			System.out.println("------>> send Agents Event");
+			List<String> agentNames = Squad.getInstance().getAgentsNames(event.getSerials());
+			Squad.getInstance().sendAgents(event.getSerials(), event.getTime());
+			complete(event, agentNames);
+		});
+
+		subscribeEvent(ReleseAgents.class, (event) -> {
+			System.out.println("------>> Release Agents Event");
+			Squad.getInstance().releaseAgents(event.GetSerialNumbers());
+			complete(event, true);
+		});
+
 		countDownLatch.countDown();
 	}
 

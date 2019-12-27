@@ -92,8 +92,7 @@ public class MessageBrokerImpl implements MessageBroker {
 				topics.get(e.getClass()).add(sub);
 				future = new Future<>();
 				futures.put(e, future);
-				System.out.println(sub.getName());
-				System.out.println(e.getClass().getName());
+				System.out.println(sub.getName() + " is the one to recive this msg: " + e.toString());
 				this.notifyAll();
 			}
 		}

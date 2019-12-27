@@ -6,6 +6,7 @@ import bgu.spl.mics.application.messeges.TerminateBroadcast;
 import bgu.spl.mics.application.messeges.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -23,15 +24,20 @@ public class Intelligence extends Subscriber {
 	private List<MissionInfo> missionList;
 	private int currTick;
 	private CountDownLatch countDownLatch;
+	private HashMap<Integer, MissionInfo> missionMap;
 
 	public Intelligence(String name, CountDownLatch countDownLatch) {
 		super(name);
 		this.countDownLatch = countDownLatch;
+		missionMap = new HashMap<>();
 	}
 
 	public void loadMissions(List<MissionInfo> missionList) {
 		this.missionList = missionList;
 		Collections.sort(missionList, comparing(MissionInfo::getTimeIssued));
+		for (MissionInfo m : missionList) {
+			missionMap.put(m.getTimeIssued(), m);
+		}
 	}
 
 	@Override
@@ -40,25 +46,36 @@ public class Intelligence extends Subscriber {
 		subscribeBroadcast(TickBroadcast.class, (tickBroadcast) -> {
 			currTick = tickBroadcast.getTick();
 
-			int count = 1;
-			while(!missionList.isEmpty() & count!=missionList.size())
+			if(missionMap.containsKey(currTick))
 			{
-				for (MissionInfo info : missionList) {
-					if (info.getTimeIssued() == currTick)
-					{
-						System.out.println("the mission " + info.getMissionName() + " is going to get published on tick " + currTick);
-						missionList.remove(info);
-						MissionRecievedEvent mre = new MissionRecievedEvent(info);
-						getSimplePublisher().sendEvent(mre);
-						complete(mre, 1);
-						notifyAll();
-						System.out.println(this.getName() + " sent event " + mre.getMissionInfo().getMissionName());
-					}
-				}
-				count++;
+				MissionInfo info = missionMap.get(currTick);
+				System.out.println("the mission " + info.getMissionName() + " will published on tick " + currTick + " by " + this.getName());
+				missionMap.remove(currTick);
+				MissionRecievedEvent mre = new MissionRecievedEvent(info);
+				getSimplePublisher().sendEvent(mre);
+				//complete(mre, 1);
+				System.out.println(this.getName() + " sent event " + mre.getMissionInfo().getMissionName());
 			}
+//			int count = 1;
+//			while(!missionList.isEmpty() & count!=missionList.size())
+//			{
+//				for (MissionInfo info : missionList) {
+//					if (info.getTimeIssued() == currTick)
+//					{
+//						System.out.println("the mission " + info.getMissionName() + " will published on tick " + currTick + " by " + this.getName());
+//						missionList.remove(info);
+//						MissionRecievedEvent mre = new MissionRecievedEvent(info);
+//						getSimplePublisher().sendEvent(mre);
+//						complete(mre, 1);
+//						//notifyAll();
+//						System.out.println(this.getName() + " sent event " + mre.getMissionInfo().getMissionName());
+//					}
+//				}
+//				count++;
+//			}
 		});
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
+			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();
 		});
 		countDownLatch.countDown();

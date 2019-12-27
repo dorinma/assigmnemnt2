@@ -7,9 +7,12 @@ import bgu.spl.mics.application.passiveObjects.Agent;
 import bgu.spl.mics.application.passiveObjects.Diary;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
 import bgu.spl.mics.application.passiveObjects.Report;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * M handles ReadyEvent - fills a report and sends agents to mission.
@@ -19,14 +22,16 @@ import java.util.concurrent.CountDownLatch;
  */
 public class M extends Subscriber {
 
-	private static Integer id = 1;
+	//private static Integer id = 1;
 	private int currTick;
+	private int serial;
 	private CountDownLatch countDownLatch;
 	private int duration; //for entire program
 	//TODO NOR GOOOOOOOOOD
 
 	public M (String name, CountDownLatch countDownLatch) {
 		super(name);
+		serial = Integer.parseInt(name.substring(1));
 		this.countDownLatch = countDownLatch;
 		currTick = 0;
 	}
@@ -35,72 +40,60 @@ public class M extends Subscriber {
 	protected void initialize() {
 		subscribeBroadcast(TickBroadcast.class, (tickBroadcast) -> {
 			currTick = tickBroadcast.getTick();
-			System.out.println("we are one tick" + currTick);
+			System.out.println("--------- TICK " + currTick + " ---------" + this.getName());
 		});
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
+			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();
-			System.out.println("terminate" + currTick);
+			System.out.println("--------- TERMINATE ON TICK " + currTick + " ---------");
 		});
 
 		subscribeEvent(MissionRecievedEvent.class, (event) -> {
 			MissionInfo currMission = event.getMissionInfo();
+			System.out.println(this.getName() + "subscribed to recive evnt" + event.getMissionInfo().getMissionName());
 			if (currMission != null) {
 				System.out.println("recived new mission" + currMission.getMissionName());
-				String gdg = currMission.getGadget();
-				GadgetsAvailableEvent getGdg = new GadgetsAvailableEvent(gdg);
-				Future<Integer> futGadget = getSimplePublisher().sendEvent(getGdg);
+				//_______________________________________________________
 
+				AgentsAvailableEvent availableAgents = new AgentsAvailableEvent(currMission.getSerialAgentsNumbers());
+				Future<Integer> futAgent_MPserial = getSimplePublisher().sendEvent(availableAgents);
+				if (futAgent_MPserial != null && futAgent_MPserial.get(currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS)!=-1) {
+					String gdg = currMission.getGadget();
+					GadgetsAvailableEvent availableGdg = new GadgetsAvailableEvent(gdg);
+					Future<Integer> futGadget = getSimplePublisher().sendEvent(availableGdg);
+					if (futGadget != null && futGadget.get(currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS) == 1) {
+						SendAgentsEvent sendAgentsEvent = new SendAgentsEvent(currMission.getSerialAgentsNumbers(), currMission.getDuration());
+						Future<List<String>> futSendingAgent = getSimplePublisher().sendEvent(sendAgentsEvent);
+						if (futSendingAgent != null) {
+							Report currReport = new Report();
+							currReport.setMissionName(currMission.getMissionName());
+							currReport.setM(serial);
+							currReport.setMoneypenny(futAgent_MPserial.get(currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS)); //TODO TO CONVERT TO INT FROM STRING
+							currReport.setAgentsSerialNumbersNumber(currMission.getSerialAgentsNumbers());
+							currReport.setAgentsNames(futSendingAgent.get(currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS));
+							currReport.setGadgetName(gdg);
+							currReport.setTimeIssued(currMission.getTimeIssued());
+							currReport.setQTime(futGadget.get(currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS));
+							currReport.setTimeCreated(currTick);
+							Diary.getInstance().addReport(currReport);
 
+							//TODO needs to wait entire duration and after release agents
 
-				System.out.println("gadget" + gdg + " was found");
-				if (futGadget.get() != -1) {
-						System.out.println("gadget" + gdg + "is avialible");
-						AgentsAvailableEvent getAgents = new AgentsAvailableEvent(currMission.getSerialAgentsNumbers());
+							complete(event, true);
 
-
-
-						Future<Integer> futAgent = getSimplePublisher().sendEvent(getAgents);
-
-
-
-						System.out.println(futAgent.get());
-						if ( !futAgent.get().equals("")) { //!futAgent.get().equals("")
-								System.out.println("agents for this mission are avialible !!!!!!!!!");
-							//	if (currMission.getTimeIssued() == currTick ) { //TODO to decide what to do =====&& currMission.getDuration() + currTick <= this.duration
-									subscribeEvent(SendAgentsEvent.class, (eventNames) -> {
-										List<String> agentsNamesList = eventNames.getAgentsNames();
-										System.out.println("ROW 11111111");
-										if (agentsNamesList != null) {
-											System.out.println("ROW 222222222");
-											//Future<List<String>> agentsNames = getSimplePublisher().sendEvent(agentsNamesList);
-											Report currReport = new Report();
-											currReport.setMissionName(currMission.getMissionName());
-											currReport.setM(this.id);
-											currReport.setMoneypenny(futAgent.get());
-											currReport.setAgentsSerialNumbersNumber(currMission.getSerialAgentsNumbers());
-											currReport.setAgentsNames(agentsNamesList); //TODO to ask tomer
-											currReport.setGadgetName(gdg);
-											currReport.setTimeIssued(currMission.getTimeIssued());
-											currReport.setQTime(futGadget.get());
-											currReport.setTimeCreated(currTick);
-											Diary.getInstance().addReport(currReport);
-
-											//TODO needs to wait entire duration and after release agents
-										}
-									});
-									//SendAgentsEvent sendAgents = new SendAgentsEvent(currMission.getSerialAgentsNumbers());
-
-								} else {
-							System.out.println("trying to release agents");
-
-							ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
-									System.out.println("trying to release agents");
-									//complete(releseAgents, 3);
-								//	getSimplePublisher().sendEvent(releseAgents);
-								//	notifyAll();
-								}
-							}
+						} else {
+							complete(event, false);
 						}
+					} else {
+						ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
+						getSimplePublisher().sendEvent(releseAgents);
+						complete(event, false);
+					}
+				} else {
+					complete(event, false);
+				}
+			}
+				Diary.getInstance().incrementTotal();
 
 		});
 		countDownLatch.countDown();

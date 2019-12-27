@@ -33,7 +33,7 @@ public class Future<T> {
      * @return return the result of type T if it is available, if not wait until it is available.
      * 	       
      */
-	public synchronized T get() {
+	public synchronized T get() { //TODO CHECK IF DEAD LOCK
 		//return this.result;
 		while (result == null) {
 			try {
@@ -56,7 +56,7 @@ public class Future<T> {
 	/**
      * @return true if this object has been resolved, false otherwise
      */
-	public synchronized boolean isDone() {
+	public boolean isDone() {
 		return this.complete;
 	}
 	
@@ -71,19 +71,36 @@ public class Future<T> {
      * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
      *         elapsed, return null.
      */
-	public synchronized T get(long timeout, TimeUnit unit)  {
-		timeout = TimeUnit.MILLISECONDS.convert(timeout, unit); //convert to milli seconds
-		if (result == null) {
+	public T get(long timeout, TimeUnit unit) {
+		long start = System.currentTimeMillis();
+		long end = start + timeout * 100;
+		while (!isDone()) {
 			try {
-				synchronized (this) {
-					unit.timedWait(this, timeout);
-				}
-			} catch (InterruptedException e) {
+				unit.sleep(10);
+			} catch (InterruptedException ex) {
 			}
-			if (result == null)
-				return null;
+			if (System.currentTimeMillis() > end)
+				break;
 		}
 		return result;
+	}
+
+		//		timeout = TimeUnit.MILLISECONDS.convert(timeout, unit); //convert to milli seconds
+//		if (result == null) {
+//			try {
+//				synchronized (this) {
+//					unit.timedWait(this, timeout);
+//				}
+//			} catch (InterruptedException e) {
+//			}
+//			if (result == null)
+//				return null;
+//		}
+//		return result;
+
+
+
+
 		/*while (!isDone())
 		{
 			System.out.println("5 is waiting?");
@@ -94,7 +111,7 @@ public class Future<T> {
 			catch (InterruptedException ex){}
 		}
 		return result;*/
-	}
+
 }
 
 
