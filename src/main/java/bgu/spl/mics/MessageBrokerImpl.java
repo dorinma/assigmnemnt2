@@ -77,6 +77,7 @@ public class MessageBrokerImpl implements MessageBroker {
 	@Override
 	public synchronized  <T> void complete(Event<T> e, T result) {
 		futures.get(e).resolve(result);
+		//futures.get(e).isDone();
 		futures.remove(e);
 	}
 
@@ -113,6 +114,8 @@ public class MessageBrokerImpl implements MessageBroker {
 				topics.get(e.getClass()).add(sub);
 				future = new Future<>();
 				futures.put(e, future);
+				System.out.println(sub.getName());
+				System.out.println(e.getClass().getName());
 				//his.notifyAll();
 			}
 		}

@@ -8,7 +8,7 @@ public class SendAgentsEvent implements Event {
 
     private List<String> serialAgentsNames;
 
-    public SendAgentsEvent(List <String> serialAgentsNames) {
+    public  SendAgentsEvent(List <String> serialAgentsNames) {
         this.serialAgentsNames = serialAgentsNames;
     }
 

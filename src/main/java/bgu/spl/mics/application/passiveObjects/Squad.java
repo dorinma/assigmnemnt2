@@ -1,9 +1,8 @@
 package bgu.spl.mics.application.passiveObjects;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Comparator.comparing;
 
 /**
  * Passive data-object representing a information about an agent in MI6.
@@ -34,11 +33,13 @@ public class Squad {
 	 * @param agents 	Data structure containing all data necessary for initialization
 	 * 						of the squad.
 	 */
-	public void load (Agent[] agents) {
+	public synchronized void load (Agent[] agents) { //TODO SYNC
 		for(int i = 0; i < agents.length; i++) {
 			agents[i].release();
 			this.agents.put(agents[i].getSerialNumber(), agents[i]);
 		}
+		//Collections.checkedSortedMap()
+	//TODO SORT THIS MAP OF AGETS BY KEY (THEIR SERIAL NUMBER)
 	}
 
 	/**
@@ -68,18 +69,26 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public boolean getAgents(List<String> serials) { //TODO syncho
+	public synchronized boolean getAgents(List<String> serials) { //TODO syncho
 
+		Collections.sort(serials);
 		for (String s : serials) {
+			System.out.println(s + "i am agent" );
 			Agent a = agents.get(s);
-			if (a == null)
+			if (a == null){
+				System.out.println(s + "i am null" );
+
+			return false;}
+			if (!agents.containsKey(a)){
+				System.out.println("im am not exited");
 				return false;
-			if (!agents.containsKey(a))
-				return false;
+			}
 		}
+
 		for (String a : serials) {
 			agents.get(a).acquire();
 		}
+		System.out.println("HADASSSSSSS");
 		return true;
 				/*Collections.sort(serials); //to avoid deadlock
 		for (String s: serials) {

@@ -7,6 +7,8 @@ import bgu.spl.mics.application.messeges.GadgetsAvailableEvent;
 import bgu.spl.mics.application.messeges.TerminateBroadcast;
 import bgu.spl.mics.application.messeges.TickBroadcast;
 import bgu.spl.mics.application.passiveObjects.Inventory;
+
+import java.util.concurrent.CountDownLatch;
 //import jdk.nashorn.internal.codegen.CompilerConstants;
 
 /**
@@ -18,11 +20,11 @@ import bgu.spl.mics.application.passiveObjects.Inventory;
 public class Q extends Subscriber {
 
 	private int currTick = 0;
-	private static Integer id = 1;
+	private CountDownLatch countDownLatch;
 
-	public Q() {
-		super(id.toString());
-		id++;
+	public Q(String name, CountDownLatch countDownLatch) {
+		super(name);
+		this.countDownLatch = countDownLatch;
 	}
 
 	@Override
@@ -37,12 +39,16 @@ public class Q extends Subscriber {
 			String gdg = event.getGadget();
 			if (Inventory.getInstance().getItem(gdg))
 			{
+				System.out.println("could get this item");
 				complete(event, currTick);
+				System.out.println(currTick);
 			}
-			else
+			else {
+				System.out.println("could NOT get this item" + currTick);
 				complete(event, -1);
-
+			}
 		});
+		countDownLatch.countDown();
 	}
 
 }

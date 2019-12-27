@@ -1,17 +1,14 @@
 package bgu.spl.mics.application.subscribers;
 
 import bgu.spl.mics.*;
-import bgu.spl.mics.application.messeges.GadgetsAvailableEvent;
 import bgu.spl.mics.application.messeges.MissionRecievedEvent;
 import bgu.spl.mics.application.messeges.TerminateBroadcast;
 import bgu.spl.mics.application.messeges.TickBroadcast;
-import bgu.spl.mics.application.passiveObjects.Diary;
-import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.MissionInfo;
-import bgu.spl.mics.application.passiveObjects.Report;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
 import static java.util.Comparator.comparing;
 
 /**
@@ -25,9 +22,11 @@ public class Intelligence extends Subscriber {
 
 	private List<MissionInfo> missionList;
 	private int currTick;
+	private CountDownLatch countDownLatch;
 
-	public Intelligence(String name) {
+	public Intelligence(String name, CountDownLatch countDownLatch) {
 		super(name);
+		this.countDownLatch = countDownLatch;
 	}
 
 	public void loadMissions(List<MissionInfo> missionList) {
@@ -42,7 +41,7 @@ public class Intelligence extends Subscriber {
 			currTick = tickBroadcast.getTick();
 
 			int count = 1;
-			while(missionList.size() > 0 & count!=missionList.size())
+			while(!missionList.isEmpty() & count!=missionList.size())
 			{
 				for (MissionInfo info : missionList) {
 					if (info.getTimeIssued() == currTick)
@@ -50,6 +49,8 @@ public class Intelligence extends Subscriber {
 						missionList.remove(info);
 						MissionRecievedEvent mre = new MissionRecievedEvent(info);
 						getSimplePublisher().sendEvent(mre);
+						//complete(mre, 1);
+						System.out.println(this.getName() + " sent event " + mre.getMissionInfo().getMissionName());
 					}
 				}
 				count++;
@@ -58,6 +59,7 @@ public class Intelligence extends Subscriber {
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
 			terminate();
 		});
+		countDownLatch.countDown();
 	}
 
 }
