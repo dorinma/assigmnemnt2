@@ -28,7 +28,6 @@ public class MI6Runner {
     public static void main(String[] args) {
         JSONParser parser = new JSONParser();
 
-       // List<Thread> allProgThreads = new LinkedList<>();
         long counterThreads = 0;
 
         try {
@@ -52,7 +51,7 @@ public class MI6Runner {
                 String name = (String)currAgentJson.get("name");
                 String serNum = (String) currAgentJson.get("serialNumber");
                 Agent a = new Agent(serNum, name);
-                System.out.println(a.getSerialNumber());
+                //System.out.println(a.getSerialNumber());
                 agents[i] = a;
             }
             Squad.getInstance().load(agents);
@@ -67,7 +66,6 @@ public class MI6Runner {
             Q singleProgQ = new Q("Q", countDownLatch);
             ExecutorService QIntelligenceExe = Executors.newCachedThreadPool();
             QIntelligenceExe.submit(singleProgQ);
-           // allProgThreads.add(new Thread(singleProgQ));
 
             //---------M---------
             long counterM = (Long)jaServices.get("M");
@@ -75,7 +73,6 @@ public class MI6Runner {
             for (int i=0; i<counterM; i++) {
                 M newM = new M("M"+(i+1), countDownLatch);
                 MExe.submit(newM);
-                //allProgThreads.add(new Thread(newM));
             }
 
             //---------Moneypenny---------
@@ -84,7 +81,6 @@ public class MI6Runner {
             for (int i=0; i<counterMoneypenny; i++) {
                 Moneypenny newMoneypenny = new Moneypenny("Moneypenny"+(i+1), countDownLatch);
                 MonneypennyExe.submit(newMoneypenny);
-                //allProgThreads.add(new Thread(newMoneypenny));
             }
 
             //---Intelligence---
@@ -107,42 +103,33 @@ public class MI6Runner {
                     JSONArray jaAgentsNumbers = (JSONArray) currSingleMission.get("serialAgentsNumbers");
                     for(int k=0; k<jaAgentsNumbers.size(); k++)
                     {
-                      //  if(!serialAgentsNumbers.contains())
                         serialAgentsNumbers.add((String)jaAgentsNumbers.get(k));
                     }
-                    System.out.println(name);
-                    for (String s: serialAgentsNumbers
-                         ) {
-                        System.out.println(s);
-                    }
+//                    System.out.println(name);
+//                    for (String s: serialAgentsNumbers) {
+//                        System.out.println(s);
+//                    }
                     MissionInfo currMission = new MissionInfo(name, serialAgentsNumbers, gadget, (int)timeIssued, (int)timeExpired, (int)duration);
                     currIntellegenceMissions.add(currMission);
                 }
                 currIntelegence.loadMissions(currIntellegenceMissions);
                 QIntelligenceExe.submit(currIntelegence);
-              //  allProgThreads.add(new Thread(currIntelegence));
             }
 
             //--------אtime---------
             long progDuration = (Long)jaServices.get("time");
             TimeService timeService = new TimeService((int)progDuration);
-           // ((LinkedList<Thread>) allProgThreads).addFirst(new Thread(timeService));
 
-          //  for (Thread t : allProgThreads) {
-            //    t.start();
-            //}
 
 
             try {
                 countDownLatch.await();
-                System.out.println("threds that need to initilialize" + countDownLatch.getCount());
+//                System.out.println("threds that need to initilialize" + countDownLatch.getCount());
             }
             catch (InterruptedException e) {}
 
             QIntelligenceExe.submit(timeService);
 
-            //Thread timeServiceThread = new Thread(timeService);
-            //timeServiceThread.start();
 
             QIntelligenceExe.shutdown(); //will no longer recive new threads
             QIntelligenceExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS); //first show down all this threds exe
@@ -154,9 +141,9 @@ public class MI6Runner {
             Inventory.getInstance().printToFile(args[1]);
             Diary.getInstance().printToFile(args[2]);
 
-            System.out.println("total missions: " + Diary.getInstance().getTotal());
-            for(int i=0; i<Diary.getInstance().getReports().size(); i++)
-                System.out.println(Diary.getInstance().getReports().get(i).getMissionName() + "has REPORTED");
+    //        System.out.println("total missions: " + Diary.getInstance().getTotal());
+       //     for(int i=0; i<Diary.getInstance().getReports().size(); i++)
+  //              System.out.println(Diary.getInstance().getReports().get(i).getMissionName() + "has REPORTED");
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -176,7 +163,7 @@ public class MI6Runner {
         int counterIntellignce = jaIntelligence.size();
         int counterQ = 1;
         int total = (int) ((int) m+counterMoneypenny+counterIntellignce+counterQ);
-        System.out.println("there are " +total+ (" int this counter"));
+        //System.out.println("there are " +total+ (" int this counter"));
         return total;
     }
 }

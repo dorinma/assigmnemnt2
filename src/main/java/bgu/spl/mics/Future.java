@@ -33,8 +33,7 @@ public class Future<T> {
      * @return return the result of type T if it is available, if not wait until it is available.
      * 	       
      */
-	public synchronized T get() { //TODO CHECK IF DEAD LOCK
-		//return this.result;
+	public synchronized T get() {
 		while (result == null) {
 			try {
 				this.wait();
@@ -84,33 +83,6 @@ public class Future<T> {
 		}
 		return result;
 	}
-
-		//		timeout = TimeUnit.MILLISECONDS.convert(timeout, unit); //convert to milli seconds
-//		if (result == null) {
-//			try {
-//				synchronized (this) {
-//					unit.timedWait(this, timeout);
-//				}
-//			} catch (InterruptedException e) {
-//			}
-//			if (result == null)
-//				return null;
-//		}
-//		return result;
-
-
-
-
-		/*while (!isDone())
-		{
-			System.out.println("5 is waiting?");
-			try
-			{
-				unit.sleep(timeout);
-			}
-			catch (InterruptedException ex){}
-		}
-		return result;*/
 
 }
 

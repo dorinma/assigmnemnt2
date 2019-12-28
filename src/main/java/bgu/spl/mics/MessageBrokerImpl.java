@@ -40,7 +40,7 @@ public class MessageBrokerImpl implements MessageBroker {
 	}
 
 	@Override
-	public synchronized <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
+	public synchronized  <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
 			if(topics.containsKey(type))
 				topics.get(type).add(m);
 			else {

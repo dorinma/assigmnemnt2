@@ -29,7 +29,7 @@ public class Inventory {
 		gadgets = new LinkedList<>();
 	}
 
-	public static synchronized Inventory getInstance() { return SingletonInventoryHolder.instance; }
+	public static Inventory getInstance() { return SingletonInventoryHolder.instance; }
 
 
     //ata structure containing all data necessary for initialization of the inventory.

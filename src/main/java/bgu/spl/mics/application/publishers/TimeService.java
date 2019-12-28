@@ -40,7 +40,7 @@ public class TimeService extends Publisher {
 				getSimplePublisher().sendBroadcast(tickBroadcast);
 				Thread.sleep(100);
 				currTick++;
-				System.out.println("--------- TICK " + currTick + " ---------" );
+//				System.out.println("--------- TICK " + currTick + " ---------" );
 			}
 			TerminateBroadcast terminateBroadcast = new TerminateBroadcast();
 			getSimplePublisher().sendBroadcast(terminateBroadcast);

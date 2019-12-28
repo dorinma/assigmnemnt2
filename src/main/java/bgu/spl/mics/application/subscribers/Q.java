@@ -33,18 +33,18 @@ public class Q extends Subscriber {
 			currTick = tickBroadcast.getTick();
 		});
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
-			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
+//			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();
 		});
 		subscribeEvent(GadgetsAvailableEvent.class, (event) -> {
 			String gdg = event.getGadget();
 			if (Inventory.getInstance().getItem(gdg))
 			{
-				System.out.println("~~~" + this.getName() + " SEND GADGET " + gdg + " in tick: " + currTick);
+//				System.out.println("~~~" + this.getName() + " SEND GADGET " + gdg + " in tick: " + currTick);
 				complete(event, currTick);
 			}
 			else {
-				System.out.println("~~~" + this.getName() + " SEND GADGET " + gdg + " FAILED!!!");
+//				System.out.println("~~~" + this.getName() + " SEND GADGET " + gdg + " FAILED!!!");
 				complete(event, -1);
 			}
 		});

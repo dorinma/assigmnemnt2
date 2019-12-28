@@ -38,39 +38,39 @@ public class Moneypenny extends Subscriber {
 			currTick = tickBroadcast.getTick();
 		});
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
-			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
+//			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();
 		});
 
 		if(this.serialNumber%2==0) {
 			subscribeEvent(AgentsAvailableEvent.class, (event) -> {
-				System.out.println("~~~" + this.getName() + " HANDLE MSG: " + event.getClass());
+//				System.out.println("~~~" + this.getName() + " HANDLE MSG: " + event.getClass());
 				List<String> agentList = (LinkedList) event.getAgents();
-				System.out.println(this.getName() + "check if all Agents Avialible:");
+//				System.out.println(this.getName() + "check if all Agents Avialible:");
 				boolean allAgentsAvialible = Squad.getInstance().getAgents(agentList);
 
 				if (allAgentsAvialible) {
-					System.out.println("----->" + this.getName() + " Acquire agents for mission");
+//					System.out.println("----->" + this.getName() + " Acquire agents for mission");
 					List<String> result = Squad.getInstance().getAgentsNames(agentList);
 					complete(event, this.serialNumber);
 				} else {
-					System.out.println("NOTTTTTTTTTT AVAILIBLEEEEEEEEEEEEEEEE");
+//					System.out.println("NOTTTTTTTTTT AVAILIBLEEEEEEEEEEEEEEEE");
 					complete(event, -1);
 				}
 			});
 		}
 		else {
 			subscribeEvent(SendAgentsEvent.class, (event) -> {
-				System.out.println(this.getName() + "------>> send Agents Event");
+//				System.out.println(this.getName() + "------>> send Agents Event");
 				List<String> agentNames = Squad.getInstance().getAgentsNames(event.getSerials());
 				Squad.getInstance().sendAgents(event.getSerials(), event.getTime());
 				complete(event, agentNames);
 			});
 
 			subscribeEvent(ReleseAgents.class, (event) -> {
-				System.out.println(this.getName() + "------>> Release Agents Event");
+//				System.out.println(this.getName() + "------>> Release Agents Event");
 				Squad.getInstance().releaseAgents(event.GetSerialNumbers());
-				System.out.println(this.getName() + " RELEASEDDDDD");
+//				System.out.println(this.getName() + " RELEASEDDDDD");
 				complete(event, true);
 			});
 

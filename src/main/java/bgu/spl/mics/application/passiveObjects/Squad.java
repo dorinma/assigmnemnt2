@@ -35,13 +35,11 @@ public class Squad {
 	 * @param agents 	Data structure containing all data necessary for initialization
 	 * 						of the squad.
 	 */
-	public synchronized void load (Agent[] agents) { //TODO SYNC
+	public void load (Agent[] agents) {
 		for(int i = 0; i < agents.length; i++) {
 			agents[i].release();
 			this.agents.put(agents[i].getSerialNumber(), agents[i]);
 		}
-		//Collections.checkedSortedMap()
-	//TODO SORT THIS MAP OF AGETS BY KEY (THEIR SERIAL NUMBER)
 	}
 
 	/**
@@ -50,10 +48,10 @@ public class Squad {
 	public synchronized void releaseAgents(List<String> serials){
 		Collections.sort(serials);
 		for (String s: serials) {
-			System.out.println(s + "is the serial to chaeck");
+		//	System.out.println(s + "is the serial to chaeck");
 			if(agents.get(s) != null)
 				agents.get(s).release();
-			System.out.println("RELEASE " + agents.get(s).getName());
+		//	System.out.println("RELEASE " + agents.get(s).getName());
 		}
 		this.notifyAll();
 	}
@@ -63,12 +61,12 @@ public class Squad {
 	 * @param time   milliseconds to sleep
 	 */
 	public synchronized void sendAgents(List<String> serials, int time) throws InterruptedException {
-		System.out.println("sleep for "+ time);
-		Thread.currentThread().sleep(time*100);
+//		System.out.println("sleep for "+ time);
+		Thread.currentThread().sleep(100*(long)time);
 		Collections.sort(serials);
 		for (String s: serials) {
 			agents.get(s).release();
-			System.out.println("RELEASE " + agents.get(s).getName());
+//			System.out.println("RELEASE " + agents.get(s).getName());
 		}
 		this.notifyAll();
 	}
@@ -100,7 +98,7 @@ public class Squad {
 					this.wait();
 				}
 				agents.get(s).acquire();
-				System.out.println(agents.get(s).getName() + " ACQUIRE ");
+//				System.out.println(agents.get(s).getName() + " ACQUIRE ");
 			}
 		}
 		return ans;
