@@ -1,4 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,8 +14,11 @@ import static java.util.Comparator.comparing;
  */
 public class Squad {
 
-	private static Squad instance=null; //for thread safe singleton
 	private Map<String, Agent> agents;
+
+	private static class SingletonSquadHolder{
+		private static Squad instance = new Squad();
+	}
 
 	private Squad() {
 		agents = new ConcurrentHashMap<>();
@@ -22,10 +27,7 @@ public class Squad {
 	/**
 	 * Retrieves the single instance of this class.
 	 */
-	public static synchronized Squad getInstance() {
-		if (instance == null)
-			instance = new Squad();
-		return instance;	}
+	public static Squad getInstance() { return SingletonSquadHolder.instance; }
 
 	/**
 	 * Initializes the squad. This method adds all the agents to the squad.
@@ -45,23 +47,30 @@ public class Squad {
 	/**
 	 * Releases agents.
 	 */
-	public void releaseAgents(List<String> serials){
+	public synchronized void releaseAgents(List<String> serials){
+		Collections.sort(serials);
 		for (String s: serials) {
-			Agent a = agents.get(s);
-			if(a != null) {
-				a.release();
-				a.notifyAll(); //TO ASK
-			}
+			System.out.println(s + "is the serial to chaeck");
+			if(agents.get(s) != null)
+				agents.get(s).release();
+			System.out.println("RELEASE " + agents.get(s).getName());
 		}
+		this.notifyAll();
 	}
 
 	/**
 	 * simulates executing a mission by calling sleep.
 	 * @param time   milliseconds to sleep
 	 */
-	public void sendAgents(List<String> serials, int time) throws InterruptedException {
+	public synchronized void sendAgents(List<String> serials, int time) throws InterruptedException {
+		System.out.println("sleep for "+ time);
 		Thread.currentThread().sleep(time*100);
-		releaseAgents(serials);
+		Collections.sort(serials);
+		for (String s: serials) {
+			agents.get(s).release();
+			System.out.println("RELEASE " + agents.get(s).getName());
+		}
+		this.notifyAll();
 	}
 
 	/**
@@ -69,39 +78,32 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public synchronized boolean getAgents(List<String> serials) { //TODO syncho
-
+	public synchronized boolean getAgents(List<String> serials) throws InterruptedException {
+		Boolean ans = true;
 		Collections.sort(serials);
-		for (String s : serials) {
-			System.out.println(s + "i am agent" );
-			Agent a = agents.get(s);
-			if (a == null){
-				System.out.println(s + "i am null" );
-
-			return false;}
-			if (!agents.containsKey(a)){
-				System.out.println("im am not exited");
-				return false;
+		for(String s : serials)
+		{
+			if(!agents.containsKey(s))
+			{
+				ans = false;
+				for(String s2 : serials) {
+					if (s2 == s)
+						break;
+					else
+						agents.get(s2).release();
+				}
+				break;
+			}
+			else{
+				while (!agents.get(s).isAvailable()) {
+					//System.out.println("waiting for " + a.getName());
+					this.wait();
+				}
+				agents.get(s).acquire();
+				System.out.println(agents.get(s).getName() + " ACQUIRE ");
 			}
 		}
-
-		for (String a : serials) {
-			agents.get(a).acquire();
-		}
-		System.out.println("HADASSSSSSS");
-		return true;
-				/*Collections.sort(serials); //to avoid deadlock
-		for (String s: serials) {
-			Agent a = agents.get(s);
-			if(a == null)
-				return false;
-			synchronized (a){
-				while(!a.isAvailable())
-					a.wait();
-				a.acquire();
-			}
-		}
-		return true; */
+		return ans;
 	}
 
     /**

@@ -8,10 +8,10 @@ import java.util.List;
 
 public class ReleseAgents implements Event<Boolean> {
 
-    List<String> agentsNumbers;
+    private List<String> agentsNumbers;
 
     public ReleseAgents(List<String> serialAgentsNumbers) {
-        this.agentsNumbers = agentsNumbers;
+        this.agentsNumbers = serialAgentsNumbers;
     }
 
     public List<String> GetSerialNumbers() { return agentsNumbers; }

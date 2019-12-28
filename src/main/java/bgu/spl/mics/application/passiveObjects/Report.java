@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -57,15 +58,16 @@ public class Report {
 
 
 	 //return The serial numbers of the agents.
-	public List<String> getAgentsSerialNumbersNumber() {
+	public List<String> getAgentsSerialNumbers() {
 		return agentsSerialNumbers;
 	}
 
 
 	//Sets the serial numbers of the agents.
-	public void setAgentsSerialNumbersNumber(List<String> agentsSerialNumbersNumber) {
-		for (String a : agentsSerialNumbersNumber) {
-			agentsSerialNumbersNumber.add(a);
+	public void setAgentsSerialNumbers(List<String> agentsSerialNumbers) {
+		this.agentsSerialNumbers = new LinkedList<String>();
+		for (int i=0; i<agentsSerialNumbers.size(); i++) {
+			this.agentsSerialNumbers.add(agentsSerialNumbers.get(i));
 		}
 	}
 
@@ -77,9 +79,11 @@ public class Report {
 
 	//Sets the agents names.
 	public void setAgentsNames(List<String> agentsNames) {
+		this.agentsNames = new LinkedList<String>();
 		for (String a : agentsNames) {
-			agentsNames.add(a);
-		}	}
+			this.agentsNames.add(a);
+		}
+	}
 
 
 	 //Retrieves the name of the gadget.

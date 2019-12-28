@@ -92,11 +92,11 @@ public class MessageBrokerImpl implements MessageBroker {
 				topics.get(e.getClass()).add(sub);
 				future = new Future<>();
 				futures.put(e, future);
-				System.out.println(sub.getName() + " is the one to recive this msg: " + e.toString());
-				this.notifyAll();
+				//System.out.println(sub.getName() + " is the one to recive this msg: " + e.toString());
+				notifyAll();
 			}
 		}
-		this.notifyAll();
+	//	this.notifyAll();
 		return future;
 	}
 
@@ -125,6 +125,7 @@ public class MessageBrokerImpl implements MessageBroker {
 		{
 			while (subscribers.get(m).isEmpty())
 			{
+				//System.out.println(m.getName() + "WAIT for mission");
 				this.wait();
 			}
 			msg = subscribers.get(m).poll();

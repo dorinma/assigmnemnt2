@@ -1,11 +1,10 @@
 package bgu.spl.mics.application;
-import bgu.spl.mics.application.passiveObjects.Agent;
-import bgu.spl.mics.application.passiveObjects.Inventory;
+import bgu.spl.mics.application.passiveObjects.*;
+
 import java.io.FileReader;
 import java.util.LinkedList;
 import java.util.List;
-import bgu.spl.mics.application.passiveObjects.MissionInfo;
-import bgu.spl.mics.application.passiveObjects.Squad;
+
 import bgu.spl.mics.application.publishers.TimeService;
 import bgu.spl.mics.application.subscribers.Intelligence;
 import bgu.spl.mics.application.subscribers.M;
@@ -139,6 +138,7 @@ public class MI6Runner {
                 System.out.println("threds that need to initilialize" + countDownLatch.getCount());
             }
             catch (InterruptedException e) {}
+
             QIntelligenceExe.submit(timeService);
 
             //Thread timeServiceThread = new Thread(timeService);
@@ -151,7 +151,12 @@ public class MI6Runner {
             MExe.shutdown();
             MExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
+            Inventory.getInstance().printToFile(args[1]);
+            Diary.getInstance().printToFile(args[2]);
 
+            System.out.println("total missions: " + Diary.getInstance().getTotal());
+            for(int i=0; i<Diary.getInstance().getReports().size(); i++)
+                System.out.println(Diary.getInstance().getReports().get(i).getMissionName() + "has REPORTED");
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -161,6 +166,8 @@ public class MI6Runner {
             e.printStackTrace();
         }
     }
+
+
 
     private static long calculateCounter(JSONObject jaServices){
         long m = (long)jaServices.get("M");

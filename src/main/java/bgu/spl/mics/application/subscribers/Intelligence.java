@@ -49,31 +49,13 @@ public class Intelligence extends Subscriber {
 			if(missionMap.containsKey(currTick))
 			{
 				MissionInfo info = missionMap.get(currTick);
-				System.out.println("the mission " + info.getMissionName() + " will published on tick " + currTick + " by " + this.getName());
+				System.out.println("~~~" + this.getName() + " PUBLISH MISSION " + info.getMissionName() + " in tick: " + currTick);
 				missionMap.remove(currTick);
 				MissionRecievedEvent mre = new MissionRecievedEvent(info);
 				getSimplePublisher().sendEvent(mre);
-				//complete(mre, 1);
-				System.out.println(this.getName() + " sent event " + mre.getMissionInfo().getMissionName());
 			}
-//			int count = 1;
-//			while(!missionList.isEmpty() & count!=missionList.size())
-//			{
-//				for (MissionInfo info : missionList) {
-//					if (info.getTimeIssued() == currTick)
-//					{
-//						System.out.println("the mission " + info.getMissionName() + " will published on tick " + currTick + " by " + this.getName());
-//						missionList.remove(info);
-//						MissionRecievedEvent mre = new MissionRecievedEvent(info);
-//						getSimplePublisher().sendEvent(mre);
-//						complete(mre, 1);
-//						//notifyAll();
-//						System.out.println(this.getName() + " sent event " + mre.getMissionInfo().getMissionName());
-//					}
-//				}
-//				count++;
-//			}
 		});
+
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
 			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();

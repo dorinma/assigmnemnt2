@@ -1,5 +1,9 @@
 package bgu.spl.mics.application.passiveObjects;
 
+import org.json.simple.JSONArray;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +17,10 @@ import java.util.List;
  */
 public class Inventory {
 	private List<String> gadgets;
-	private static Inventory instance = null;
+
+	private static class SingletonInventoryHolder{
+		private static Inventory instance = new Inventory();
+	}
 	/**
      * Retrieves the single instance of this class.
      */
@@ -22,10 +29,7 @@ public class Inventory {
 		gadgets = new LinkedList<>();
 	}
 
-	public static synchronized Inventory getInstance() {
-		if (instance == null)
-			instance = new Inventory();
-		return instance;	}
+	public static synchronized Inventory getInstance() { return SingletonInventoryHolder.instance; }
 
 
     //ata structure containing all data necessary for initialization of the inventory.
@@ -51,5 +55,16 @@ public class Inventory {
 
 	public void printToFile(String filename){
 		//TODO: Implement this
+		JSONArray list = new JSONArray();
+		for (int i = 0;i<getInstance().gadgets.size();i++)
+		{
+			list.add(getInstance().gadgets.get(i));
+
+		}
+		try (FileWriter file = new FileWriter(filename)) {
+			file.write(list.toJSONString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

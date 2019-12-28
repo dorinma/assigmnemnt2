@@ -15,7 +15,7 @@ public class SendAgentsEvent implements Event<List<String>> {
         this.time = time;
     }
 
-    public List<String> getSerials(){
+    public List<String> getSerials  (){
         return agents;
     }
 

@@ -40,9 +40,11 @@ public class Q extends Subscriber {
 			String gdg = event.getGadget();
 			if (Inventory.getInstance().getItem(gdg))
 			{
+				System.out.println("~~~" + this.getName() + " SEND GADGET " + gdg + " in tick: " + currTick);
 				complete(event, currTick);
 			}
 			else {
+				System.out.println("~~~" + this.getName() + " SEND GADGET " + gdg + " FAILED!!!");
 				complete(event, -1);
 			}
 		});
