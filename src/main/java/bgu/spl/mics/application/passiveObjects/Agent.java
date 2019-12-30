@@ -40,7 +40,7 @@ public class Agent {
 	//Retrieves if the agent is available.
 	public synchronized boolean isAvailable() {
 		return available;
-	} //TODO SYNC
+	}
 
 	//Acquires an agent.
 	public synchronized void acquire(){

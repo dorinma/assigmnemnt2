@@ -133,17 +133,17 @@ public class MI6Runner {
 
             QIntelligenceExe.shutdown(); //will no longer recive new threads
             QIntelligenceExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS); //first show down all this threds exe
-            MonneypennyExe.shutdown();
+            MonneypennyExe.shutdownNow();
             MonneypennyExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-            MExe.shutdown();
+            MExe.shutdownNow();
             MExe.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
             Inventory.getInstance().printToFile(args[1]);
             Diary.getInstance().printToFile(args[2]);
 
-    //        System.out.println("total missions: " + Diary.getInstance().getTotal());
-       //     for(int i=0; i<Diary.getInstance().getReports().size(); i++)
-  //              System.out.println(Diary.getInstance().getReports().get(i).getMissionName() + "has REPORTED");
+            System.out.println("total missions: " + Diary.getInstance().getTotal());
+            for(int i=0; i<Diary.getInstance().getReports().size(); i++)
+                System.out.println(Diary.getInstance().getReports().get(i).getMissionName() + "has REPORTED");
 
         } catch (ParseException e) {
             e.printStackTrace();

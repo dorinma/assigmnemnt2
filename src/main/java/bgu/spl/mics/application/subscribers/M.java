@@ -42,13 +42,13 @@ public class M extends Subscriber {
 			currTick = tickBroadcast.getTick();
 		});
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
-//			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
+			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();
 		});
 
 		subscribeEvent(MissionRecievedEvent.class, (event) -> {
 			MissionInfo currMission = event.getMissionInfo();
-//			System.out.println("~~~" + this.getName() + " HANDLE MSG: " + event.getMissionInfo().getMissionName());
+			System.out.println("~~~" + this.getName() + " HANDLE MSG: " + event.getMissionInfo().getMissionName());
 			if (currMission != null) {
 				//_______________________________________________________
 
@@ -60,16 +60,16 @@ public class M extends Subscriber {
 						String gdg = currMission.getGadget();
 						GadgetsAvailableEvent availableGdg = new GadgetsAvailableEvent(gdg);
 						Future<Integer> futGadget = getSimplePublisher().sendEvent(availableGdg);
-						Integer qTime = futGadget.get();//(currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS);
+						Integer qTime = futGadget.get();//currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS);
 						if (futGadget != null && qTime != -1) {
 							if (qTime + currMission.getDuration() < currMission.getTimeExpired()) {
-								//System.out.println("DUARIOTN" + currMission.getDuration());
+								System.out.println("DUARIOTN" + currMission.getDuration());
 								SendAgentsEvent sendAgentsEvent = new SendAgentsEvent(currMission.getSerialAgentsNumbers(), currMission.getDuration());
 //								System.out.println("SEND AGENTS EVENT time: " + sendAgentsEvent.getTime());
 								Future<List<String>> futSendingAgent = getSimplePublisher().sendEvent(sendAgentsEvent);
 								List<String> agentsName = futSendingAgent.get(); //(currMission.getTimeExpired() - currTick, TimeUnit.MILLISECONDS);
 								if (futSendingAgent != null) {
-//									System.out.println(this.getName() + " START REPORT: ");
+									System.out.println(this.getName() + " START REPORT: ");
 
 									Report currReport = new Report();
 									currReport.setMissionName(currMission.getMissionName());
@@ -80,29 +80,29 @@ public class M extends Subscriber {
 									currReport.setGadgetName(gdg);
 									currReport.setTimeIssued(currMission.getTimeIssued());
 									currReport.setQTime(qTime);
-									System.out.println(qTime);
-									System.out.println(qTime + currMission.getDuration());
+									System.out.println("qTime: " + qTime + " mission name: " + currMission.getMissionName());
+									System.out.println("qTime + duration = " + (int)(qTime + currMission.getDuration()));
 									currReport.setTimeCreated(qTime + currMission.getDuration());
 									Diary.getInstance().addReport(currReport);
 									complete(event, true);
 								} //if (futSendingAgent != null)
 								else {
-//									System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
+									System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
 									complete(event, false);
 								}
 							} //if (qTime + currMission.getDuration() < currMission.getTimeExpired())
 							else {
-//								System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
-//								System.out.println("time issued: " + currMission.getTimeIssued() + " + mission duration: " + currMission.getDuration() +
-//										" > time expired: " + currMission.getTimeExpired());
+								System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
+								System.out.println("time issued: " + currMission.getTimeIssued() + " + mission duration: " + currMission.getDuration() +
+										" > time expired: " + currMission.getTimeExpired());
 								ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
 								getSimplePublisher().sendEvent(releseAgents);
 								complete(event, false);
 							}
 						} //if (futGadget != null && qTime != -1)
 						else {
-//							System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
-//							System.out.println(gdg + "GADGET NOT FOUND - " + currMission.getMissionName() + " mission failed");
+							System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
+							System.out.println(gdg + "GADGET NOT FOUND - " + currMission.getMissionName() + " mission failed");
 							ReleseAgents releseAgents = new ReleseAgents(currMission.getSerialAgentsNumbers());
 							getSimplePublisher().sendEvent(releseAgents);
 							complete(event, false);
@@ -110,12 +110,12 @@ public class M extends Subscriber {
 					}//if (mpSerial != -1)
 				}//(futAgent_MPserial != null)
 				else {
-//					System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
+					System.out.println(currMission.getMissionName() + " MISSION FAILED - NOT REPORTED!");
 					complete(event, false);
 				}
 			}//if (currMission != null)
 			else
-//				System.out.println(currMission.getMissionName() + " MISSION NOT FOUND?!?!?!");
+				System.out.println(currMission.getMissionName() + " MISSION NOT FOUND?!?!?!");
 
 
 			Diary.getInstance().incrementTotal();

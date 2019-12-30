@@ -49,7 +49,7 @@ public class Intelligence extends Subscriber {
 			if(missionMap.containsKey(currTick))
 			{
 				MissionInfo info = missionMap.get(currTick);
-//				System.out.println("~~~" + this.getName() + " PUBLISH MISSION " + info.getMissionName() + " in tick: " + currTick);
+				//System.out.println("~~~" + this.getName() + " PUBLISH MISSION " + info.getMissionName() + " in tick: " + currTick);
 				missionMap.remove(currTick);
 				MissionRecievedEvent mre = new MissionRecievedEvent(info);
 				getSimplePublisher().sendEvent(mre);
@@ -57,7 +57,7 @@ public class Intelligence extends Subscriber {
 		});
 
 		subscribeBroadcast(TerminateBroadcast.class, (terminateBroad) -> {
-//			System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
+			//System.out.println("------------------->>>>>>>>>> "+ this.getName() + " terminated");
 			terminate();
 		});
 		countDownLatch.countDown();

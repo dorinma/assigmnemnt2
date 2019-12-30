@@ -34,11 +34,13 @@ public class Future<T> {
      * 	       
      */
 	public synchronized T get() {
-		while (result == null) {
+		while (!isDone()&&!Thread.currentThread().isInterrupted()) {
 			try {
 				this.wait();
 			}
-			catch (InterruptedException ex) {}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 		}
 		return this.result;
 	}
@@ -49,7 +51,7 @@ public class Future<T> {
 	public synchronized void resolve (T result) {
 		this.result = result;
 		complete = true;
-		notifyAll();
+		this.notifyAll();
 	}
 	
 	/**

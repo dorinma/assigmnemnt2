@@ -48,10 +48,10 @@ public class Squad {
 	public synchronized void releaseAgents(List<String> serials){
 		Collections.sort(serials);
 		for (String s: serials) {
-		//	System.out.println(s + "is the serial to chaeck");
+			System.out.println(s + "is the serial to chaeck");
 			if(agents.get(s) != null)
 				agents.get(s).release();
-		//	System.out.println("RELEASE " + agents.get(s).getName());
+			System.out.println("RELEASE " + agents.get(s).getName());
 		}
 		this.notifyAll();
 	}
@@ -61,12 +61,15 @@ public class Squad {
 	 * @param time   milliseconds to sleep
 	 */
 	public synchronized void sendAgents(List<String> serials, int time) throws InterruptedException {
-//		System.out.println("sleep for "+ time);
-		Thread.currentThread().sleep(100*(long)time);
+		System.out.println("sleep for "+ time);
 		Collections.sort(serials);
+		try {
+			Thread.currentThread().sleep(100 * (long) time);
+		}
+		catch (InterruptedException e){}
 		for (String s: serials) {
 			agents.get(s).release();
-//			System.out.println("RELEASE " + agents.get(s).getName());
+			System.out.println("RELEASE " + agents.get(s).getName());
 		}
 		this.notifyAll();
 	}
@@ -76,7 +79,7 @@ public class Squad {
 	 * @param serials   the serial numbers of the agents
 	 * @return ‘false’ if an agent of serialNumber ‘serial’ is missing, and ‘true’ otherwise
 	 */
-	public synchronized boolean getAgents(List<String> serials) throws InterruptedException {
+	public boolean getAgents(List<String> serials) throws InterruptedException { //TODO I DELETED SYNC
 		Boolean ans = true;
 		Collections.sort(serials);
 		for(String s : serials)
@@ -93,12 +96,21 @@ public class Squad {
 				break;
 			}
 			else{
-				while (!agents.get(s).isAvailable()) {
-					//System.out.println("waiting for " + a.getName());
-					this.wait();
+				synchronized (this) {
+					while (!agents.get(s).isAvailable()&&!Thread.currentThread().isInterrupted()) {
+						try {
+							//System.out.println("waiting for " + a.getName());
+							this.wait();
+						}
+						catch (InterruptedException e){
+							Thread.currentThread().interrupt();
+							ans = false;
+							//System.out.println("catch Exceptionnn!!!");
+						}
+					}
+					//System.out.println(agents.get(s).getName() + " ACQUIRE ");
 				}
 				agents.get(s).acquire();
-//				System.out.println(agents.get(s).getName() + " ACQUIRE ");
 			}
 		}
 		return ans;

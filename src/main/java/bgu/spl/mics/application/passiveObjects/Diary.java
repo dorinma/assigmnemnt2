@@ -24,7 +24,8 @@ public class Diary {
 	//Retrieves the single instance of this class.
 
 	private List<Report> reports;
-	static AtomicInteger totalMissions = new AtomicInteger();
+	//static AtomicInteger totalMissions = new AtomicInteger();
+	private int total;
 
 	private static class SingletonDiaryHolder{
 		private static Diary instance = new Diary();
@@ -32,6 +33,7 @@ public class Diary {
 
 	public Diary(){
 		reports = new LinkedList<>();
+		total = 0;
 	}
 
 	public static Diary getInstance() { return SingletonDiaryHolder.instance; }
@@ -48,12 +50,15 @@ public class Diary {
 
 
 	//return the total number of received missions (executed / aborted) be all the M-instances
-	public AtomicInteger getTotal(){
-		return this.totalMissions;
-	} //TODO check signiture
+	//public AtomicInteger getTotal(){
+	public int getTotal(){
+		return this.total;
+		//return this.totalMissions;
+	}
 
 	public void incrementTotal(){
-		this.totalMissions.incrementAndGet();
+		//this.totalMissions.incrementAndGet();
+		this.total++;
 	}
 
 	public void printToFile(String filename){
@@ -81,9 +86,13 @@ public class Diary {
 			obj.put("timeIssued", getInstance().reports.get(i).getTimeIssued());
 			obj.put("timeCreated", getInstance().reports.get(i).getTimeCreated());
 
-
 			list.add(obj);
 		}
+
+		JSONObject objTotal = new JSONObject();
+		String t = Integer.toString(this.total);
+		objTotal.put("Total missions", t);
+		list.add(objTotal);
 
 
 		try (FileWriter file = new FileWriter(filename)) {
